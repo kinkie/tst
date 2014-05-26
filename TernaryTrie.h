@@ -1,6 +1,7 @@
 #ifndef SQUID_TERNARYTRIE_H_
 #define SQUID_TERNARYTRIE_H_
 
+#include <utility>
 
 template <class Key, class Value>
 class TernaryTrie
@@ -11,8 +12,22 @@ public:
     typedef std::pair<const Key, Value> value_type;
     typedef std::size_t size_type;
 
-    // typedef ... iterator
-    // typedef ... const_iterator
+    class Node {
+        Node *left_, *right_, *equal_, *parent_;
+        TernaryTrie::value_type data;
+        unsigned char c;
+    public:
+        explicit Node ( Node *parent );
+        ~Node();
+
+    };
+
+    class TernaryTrieIterator {
+    public:
+    };
+
+    typedef TernaryTrieIterator iterator;
+    typedef const TernaryTrieIterator const_iterator;
     // typedef ... reverse_iterator
     // typedef ... const_reverse_iterator
 
@@ -34,11 +49,11 @@ public:
     size_type size() const;
     size_type max_size() const;
 
-    mapped_type& operator[] (const key_type& k) //(*((this->insert(make_pair(k,mapped_type()))).first)).second
+    mapped_type& operator[] (const key_type& k); //(*((this->insert(make_pair(k,mapped_type()))).first)).second
     mapped_type& at (const key_type& k);
     const mapped_type& at (const key_type& k) const;
 
-    pair<iterator,bool> insert (const value_type& val);
+    std::pair<iterator,bool> insert (const value_type& val);
     template <class InputIterator>
     void insert (InputIterator first, InputIterator last);
 
@@ -49,6 +64,12 @@ public:
     //void swap (map& x);
     void clear();
 
+    //iterator find (const key_type& k);
+    //const_iterator find (const key_type& k) const;
+    //iterator find_longest_prefix (const key_type& k);
+    //const_iterator find_longest_prefix (const key_type& k) const;
+
+    //size_type count (const key_type& k) const { return find(k)!=end(); }
 };
 
 #endif /* SQUID_TERNARYTRIE_H_ */

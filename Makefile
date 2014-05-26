@@ -1,7 +1,11 @@
-all: libTernaryTrie.a testTernaryTrie
+CFLAGS = -g
+CXXFLAGS = -g
 
-libTernaryTrie.a: TernaryTrie.cc TernaryTrie.h
-	ar cru $@ $^
+all: libTernaryTrie.a TestTernaryTrie
+
+libTernaryTrie.a: TernaryTrie.o TernaryTrie.h
+	ar rcs $@ $^
 	
-testTernaryTrie: testTernaryTrie.cc libTernaryTrie.a 
-	gcc -g testTernaryTrie.cc -o $< -L. -lTernaryTrie
+TestTernaryTrie: TestTernaryTrie.cc libTernaryTrie.a
+	g++ -g TestTernaryTrie.cc -o $@ -L. -lTernaryTrie -lcppunit
+	

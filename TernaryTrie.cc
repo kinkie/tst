@@ -30,10 +30,10 @@
  *
  */
 
-#include "squid.h"
 #include "TernaryTrie.h"
 
-TernaryTrie::TernaryTrie() {
+template <class Key, class Value>
+TernaryTrie<Key, Value>::TernaryTrie() {
     // TODO Auto-generated constructor stub
 
 }
