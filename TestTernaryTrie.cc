@@ -1,3 +1,4 @@
+#include "TernaryTrie.h"
 #include "TestTernaryTrie.h"
 
 #include <cppunit/BriefTestProgressListener.h>
@@ -38,8 +39,9 @@ main (int argc, char ** argv)
     return result.wasSuccessful() ? 0 : 1;
 }
 
+typedef TernaryTrie<std::string,int> TT;
 void
 TestTernaryTrie::testInsert()
 {
-
+    TT tt;
 }

@@ -1,11 +1,14 @@
 CFLAGS = -g
-CXXFLAGS = -g
+CXXFLAGS = -g -std=c++11
 
 all: libTernaryTrie.a TestTernaryTrie
 
-libTernaryTrie.a: TernaryTrie.o TernaryTrie.h
-	ar rcs $@ $^
+clean:
+	rm *.a *.o
+
+libTernaryTrie.a: TernaryTrie.o
+	ar cru $@ $^
 	
-TestTernaryTrie: TestTernaryTrie.cc libTernaryTrie.a
-	g++ -g TestTernaryTrie.cc -o $@ -L. -lTernaryTrie -lcppunit
-	
+TestTernaryTrie: TestTernaryTrie.o libTernaryTrie.a TernaryTrie.h
+	g++ $(CXXFLAGS) $^ -o $@ -L. -lTernaryTrie -lcppunit
+

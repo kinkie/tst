@@ -3,6 +3,11 @@
 
 #include <utility>
 
+/* for inspiration see:
+ * https://github.com/nlehuen/pytst/tree/master/include
+ * https://code.google.com/p/tstdb/source/browse/#svn%2Ftrunk%2Fv2%2Fsrc
+ *
+ */
 template <class Key, class Value>
 class TernaryTrie
 {
@@ -11,15 +16,17 @@ public:
     typedef Value mapped_type;
     typedef std::pair<const Key, Value> value_type;
     typedef std::size_t size_type;
+    class Node;
+    class TernaryTrieIterator;
 
     class Node {
+        friend class TernaryTrie;
         Node *left_, *right_, *equal_, *parent_;
         TernaryTrie::value_type data;
-        unsigned char c;
+        unsigned char c_;
     public:
-        explicit Node ( Node *parent );
+        explicit Node ( Node *parent, unsigned char c ) : left_(nullptr), right_(nullptr), equal_(nullptr), parent_(parent), c_(c) {}
         ~Node();
-
     };
 
     class TernaryTrieIterator {
@@ -68,8 +75,29 @@ public:
     //const_iterator find (const key_type& k) const;
     //iterator find_longest_prefix (const key_type& k);
     //const_iterator find_longest_prefix (const key_type& k) const;
+    //iterator find_with_prefix_filter(const key_type &prefix);
+    //const_iterator find_with_prefix_filter(const key_type &prefix) const;
 
     //size_type count (const key_type& k) const { return find(k)!=end(); }
+
+private:
+    Node *root;
+    size_type size_;
 };
+
+template <class Key, class Value>
+TernaryTrie<Key, Value>::TernaryTrie() : root(nullptr), size_(0) { }
+
+template <class Key, class Value>
+TernaryTrie<Key, Value>::~TernaryTrie() {
+    delete root;
+}
+
+template <class Key, class Value>
+TernaryTrie<Key, Value>::Node::~Node() {
+    delete left_;
+    delete right_;
+    delete equal_;
+}
 
 #endif /* SQUID_TERNARYTRIE_H_ */
