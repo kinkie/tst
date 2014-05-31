@@ -10,6 +10,7 @@ class TestTernaryTrie  : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE( TestTernaryTrie );
     CPPUNIT_TEST( testInsert );
+    CPPUNIT_TEST( testErase );
     CPPUNIT_TEST_SUITE_END();
 
 protected:

@@ -199,8 +199,11 @@ TernaryTrie<Key, Value>::erase(const key_type &k)
 {
     Node *n=getNode(root, k);
     if (!n)
-        return;
-    if (n->data.first.size())
+        return 0;
+    if (n->data.first.size()) {
         n->data = value_type();
+        return 1;
+    }
+    return 0;
 }
 #endif /* SQUID_TERNARYTRIE_H_ */

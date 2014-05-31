@@ -46,7 +46,9 @@ TestTernaryTrie::testErase()
     tt.insert(std::make_pair(std::string("bar"), 2));
     CPPUNIT_ASSERT_EQUAL(1, tt.at("foo"));
     CPPUNIT_ASSERT_EQUAL(2, tt.at("bar"));
-    tt.erase(std::string("foo"));
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tt.erase(std::string("gazonk")))); // not found
+    CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(tt.erase(std::string("foo")))); // found
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tt.erase(std::string("foo")))); // found but no data
     CPPUNIT_ASSERT_THROW(tt.at("foo"),std::out_of_range);
 }
 
