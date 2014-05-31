@@ -70,6 +70,9 @@ TestTernaryTrie::testCount()
     tt.insert(std::make_pair(std::string("bar"), 2));
     CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(tt.count("foo")));
     CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tt.count("gazonk")));
+    CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(tt.count("bar")));
+    tt.erase("bar");
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tt.count("bar")));
 }
 
 /*** boilerplate starts here ***/
