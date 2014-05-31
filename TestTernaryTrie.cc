@@ -52,6 +52,25 @@ TestTernaryTrie::testErase()
     CPPUNIT_ASSERT_THROW(tt.at("foo"),std::out_of_range);
 }
 
+void
+TestTernaryTrie::testOperatorSquareBrackets()
+{
+//    TT tt;
+//    tt["foo"] = 1;
+//    tt["bar"] = 2;
+//    CPPUNIT_ASSERT_EQUAL(1, tt.at("foo"));
+//    CPPUNIT_ASSERT_EQUAL(1, tt["foo"]);
+}
+
+void
+TestTernaryTrie::testCount()
+{
+    TT tt;
+    tt.insert(std::make_pair(std::string("foo"), 1));
+    tt.insert(std::make_pair(std::string("bar"), 2));
+    CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(tt.count("foo")));
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tt.count("gazonk")));
+}
 
 /*** boilerplate starts here ***/
 

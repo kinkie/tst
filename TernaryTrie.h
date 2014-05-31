@@ -55,7 +55,7 @@ public:
     size_type size() const { return size_; }
     size_type max_size() const; // placeholder
 
-    mapped_type& operator[] (const key_type& k); //(*((this->insert(make_pair(k,mapped_type()))).first)).second
+    mapped_type& operator[] (const key_type& k);
     // returns ref to element, throws std::out_of_range if element is not present
     mapped_type& at (const key_type& k) throw (std::out_of_range);
     const mapped_type& at (const key_type& k) const throw (std::out_of_range);
@@ -81,11 +81,11 @@ public:
     //iterator find_with_prefix_filter(const key_type &prefix);
     //const_iterator find_with_prefix_filter(const key_type &prefix) const;
 
-    //size_type count (const key_type& k) const { return find(k)!=end(); }
+    size_type count (const key_type& k) const;
 
 private:
     // return a Node* or nullptr if key is not in the tree
-    Node *getNode(Node *subtree, const key_type &key, size_type pos = 0);
+    Node *getNode(Node *subtree, const key_type &key, size_type pos = 0) const;
     Node *putNode(Node *n, const value_type& value, int depth = 0);
 
     Node *parent(Node *n) const { if (n != nullptr) return n.parent_; return nullptr; }
@@ -140,7 +140,7 @@ throw (std::out_of_range)
 
 template <class Key, class Value>
 typename TernaryTrie<Key, Value>::Node *
-TernaryTrie<Key, Value>::getNode (Node *subtree, const key_type &key, size_type pos)
+TernaryTrie<Key, Value>::getNode (Node *subtree, const key_type &key, size_type pos) const
 {
     if (subtree == nullptr)
         return nullptr;
@@ -202,8 +202,24 @@ TernaryTrie<Key, Value>::erase(const key_type &k)
         return 0;
     if (n->data.first.size()) {
         n->data = value_type();
+        //--size_; //todo
         return 1;
     }
     return 0;
+}
+
+template <class Key, class Value>
+typename TernaryTrie<Key, Value>::mapped_type&
+TernaryTrie<Key, Value>::operator[] (const key_type& k)
+{
+    // TODO: need iterator first
+    //return (*((insert(make_pair(k,mapped_type()))).first)).second;
+}
+
+template <class Key, class Value>
+typename TernaryTrie<Key, Value>::size_type TernaryTrie<Key, Value>::count(const key_type& k) const
+{
+    Node *n=getNode(root,k);
+    return (n && n->data.first.size() != 0);
 }
 #endif /* SQUID_TERNARYTRIE_H_ */
