@@ -14,6 +14,7 @@ class TestTernaryTrie  : public CPPUNIT_NS::TestFixture
 
 protected:
     void testInsert();
+    void testErase();
 };
 
 #endif /* SQUID_TESTTERNARYTRIE_H_ */

@@ -15,10 +15,41 @@ typedef TernaryTrie<std::string,int> TT;
 void
 TestTernaryTrie::testInsert()
 {
+    // single-argument insert
+    {
+        TT tt;
+        tt.insert(std::make_pair(std::string("foo"), 1));
+        tt.insert(std::make_pair(std::string("bar"), 2));
+        CPPUNIT_ASSERT_EQUAL(1, tt.at("foo"));
+        CPPUNIT_ASSERT_EQUAL(2, tt.at("bar"));
+        CPPUNIT_ASSERT_THROW(tt.at("gazonk"),std::out_of_range);
+    }
+    // range insert
+    {
+        TT tt;
+        typedef std::vector<TT::value_type> V;
+        V v;
+        v.push_back(std::make_pair("foo",1));
+        v.push_back(std::make_pair("bar",2));
+        tt.insert(v.begin(),v.end());
+        CPPUNIT_ASSERT_EQUAL(1, tt.at("foo"));
+        CPPUNIT_ASSERT_EQUAL(2, tt.at("bar"));
+        CPPUNIT_ASSERT_THROW(tt.at("gazonk"),std::out_of_range);
+    }
+}
+
+void
+TestTernaryTrie::testErase()
+{
     TT tt;
     tt.insert(std::make_pair(std::string("foo"), 1));
+    tt.insert(std::make_pair(std::string("bar"), 2));
     CPPUNIT_ASSERT_EQUAL(1, tt.at("foo"));
+    CPPUNIT_ASSERT_EQUAL(2, tt.at("bar"));
+    tt.erase(std::string("foo"));
+    CPPUNIT_ASSERT_THROW(tt.at("foo"),std::out_of_range);
 }
+
 
 /*** boilerplate starts here ***/
 

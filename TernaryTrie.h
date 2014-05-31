@@ -184,5 +184,23 @@ TernaryTrie<Key, Value>::insert(const value_type &val)
     return std::make_pair(iterator(), true); //todo: return a real iterator
 }
 
+template <class Key, class Value>
+template <class InputIterator>
+void
+TernaryTrie<Key, Value>::insert(InputIterator first, InputIterator last)
+{
+    for (InputIterator i = first; i != last; ++i)
+        insert(*i);
+}
 
+template <class Key, class Value>
+typename TernaryTrie<Key, Value>::size_type
+TernaryTrie<Key, Value>::erase(const key_type &k)
+{
+    Node *n=getNode(root, k);
+    if (!n)
+        return;
+    if (n->data.first.size())
+        n->data = value_type();
+}
 #endif /* SQUID_TERNARYTRIE_H_ */
