@@ -9,6 +9,19 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 
+/** tests start here **/
+
+typedef TernaryTrie<std::string,int> TT;
+void
+TestTernaryTrie::testInsert()
+{
+    TT tt;
+    tt.insert(std::make_pair(std::string("foo"), 1));
+    CPPUNIT_ASSERT_EQUAL(1, tt.at("foo"));
+}
+
+/*** boilerplate starts here ***/
+
 CPPUNIT_TEST_SUITE_REGISTRATION( TestTernaryTrie );
 
 int
@@ -39,9 +52,3 @@ main (int argc, char ** argv)
     return result.wasSuccessful() ? 0 : 1;
 }
 
-typedef TernaryTrie<std::string,int> TT;
-void
-TestTernaryTrie::testInsert()
-{
-    TT tt;
-}

@@ -1,14 +1,19 @@
+CXX=/usr/bin/g++
 CFLAGS = -g
 CXXFLAGS = -g -std=c++11
+TESTS = TestTernaryTrie
+LIBS = libTernaryTrie.a
 
-all: libTernaryTrie.a TestTernaryTrie
-	./TestTernaryTrie
+all: $(LIBS) check
+
+check: $(TESTS)
+	for a in $^; do ./$$a; done
 
 clean:
-	rm *.a *.o
+	rm $(LIBS) $(TESTS) *.o
 
 libTernaryTrie.a: TernaryTrie.o
 	ar cru $@ $^
 	
-TestTernaryTrie: TestTernaryTrie.o libTernaryTrie.a TernaryTrie.h
+TestTernaryTrie: TestTernaryTrie.o TernaryTrie.h
 	g++ $(CXXFLAGS) $^ -o $@ -L. -lTernaryTrie -lcppunit
