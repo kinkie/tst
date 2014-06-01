@@ -75,6 +75,19 @@ TestTernaryTrie::testCount()
     CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tt.count("bar")));
 }
 
+void
+TestTernaryTrie::testClearAndSize()
+{
+    TT tt;
+    tt.insert(std::make_pair(std::string("foo"), 1));
+    tt.insert(std::make_pair(std::string("bar"), 2));
+    CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(tt.count("foo")));
+    CPPUNIT_ASSERT_EQUAL(2, static_cast<int>(tt.size()));
+    tt.clear();
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tt.count("foo")));
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(tt.size()));
+}
+
 /*** boilerplate starts here ***/
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestTernaryTrie );

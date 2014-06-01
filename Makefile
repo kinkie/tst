@@ -10,7 +10,7 @@ check: $(TESTS)
 	for a in $^; do ./$$a; done
 
 clean:
-	rm $(LIBS) $(TESTS) *.o
+	-rm $(LIBS) $(TESTS) *.o
 
 libTernaryTrie.a: TernaryTrie.o
 	ar cru $@ $^

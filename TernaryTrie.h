@@ -87,6 +87,7 @@ private:
     // return a Node* or nullptr if key is not in the tree
     Node *getNode(Node *subtree, const key_type &key, size_type pos = 0) const;
     Node *putNode(Node *n, const value_type& value, int depth = 0);
+    Node *clearSubTree(Node *n);
 
     Node *parent(Node *n) const { if (n != nullptr) return n.parent_; return nullptr; }
     Node *left(Node *n) const { if (n != nullptr) return n->left_; return nullptr; }
@@ -110,8 +111,8 @@ TernaryTrie<Key, Value>::~TernaryTrie() {
 template <class Key, class Value>
 TernaryTrie<Key, Value>::Node::~Node() {
     delete left_;
-    delete right_;
     delete equal_;
+    delete right_;
 }
 
 template <class Key, class Value>
@@ -163,14 +164,17 @@ typename TernaryTrie<Key, Value>::Node *TernaryTrie<Key, Value>::putNode (
     if (n == nullptr) {
         n = new Node(nullptr,c);
     }
-    if (c < n->c)
+    if (c < n->c) {
         n->left_ = putNode(n->left_, v, depth);
-    else if (c > n->c)
+    } else if (c > n->c) {
         n->right_ = putNode(n->right_, v, depth);
-    else if (depth < v.first.size() -1)
+    } else if (depth < v.first.size() -1) {
         n->equal_ = putNode(n->equal_, v, depth+1);
-    else
+    } else {
+        if (n->data.first.size() == 0)
+            ++size_;
         n->data = v;
+    }
     return n;
 }
 
@@ -202,7 +206,7 @@ TernaryTrie<Key, Value>::erase(const key_type &k)
         return 0;
     if (n->data.first.size()) {
         n->data = value_type();
-        //--size_; //todo
+        --size_; //todo
         return 1;
     }
     return 0;
@@ -221,5 +225,26 @@ typename TernaryTrie<Key, Value>::size_type TernaryTrie<Key, Value>::count(const
 {
     Node *n=getNode(root,k);
     return (n && n->data.first.size() != 0);
+}
+
+template <class Key, class Value>
+void TernaryTrie<Key, Value>::clear()
+{
+    root = clearSubTree(root);
+    // todo: change to "delete root; size_=0;
+}
+
+template <class Key, class Value>
+typename TernaryTrie<Key, Value>::Node * TernaryTrie<Key, Value>::clearSubTree(Node *n)
+{
+    if (!n)
+        return n;
+    n->left_ = clearSubTree(left(n)); // need to reset pointers or ~Node will double-free
+    n->equal_ = clearSubTree(equal(n));
+    n->right_ = clearSubTree(right(n));
+    if (n->data.first.size())
+        --size_;
+    delete n;
+    return nullptr;
 }
 #endif /* SQUID_TERNARYTRIE_H_ */
