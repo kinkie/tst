@@ -1,4 +1,4 @@
-
+#include <iterator>
 
 template <class Key, class Value>
 class TernaryTrie;
@@ -21,3 +21,9 @@ TernaryTrieNode<Key, Value>::~TernaryTrieNode() {
     delete right_;
 }
 
+
+template <class Key, class Value>
+class TernaryTrieNodeIterator : public std::iterator<std::bidirectional_iterator_tag, TernaryTrieNode<Key,Value> *>
+{
+    //TODO
+};

@@ -1,4 +1,4 @@
-#include "TernaryTrie.h"
+#include "Trie.h"
 #include "TestTernaryTrie.h"
 
 #include <cppunit/BriefTestProgressListener.h>
