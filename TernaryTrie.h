@@ -1,6 +1,8 @@
 #ifndef SQUID_TERNARYTRIE_H_
 #define SQUID_TERNARYTRIE_H_
 
+#include "TernaryTrieNode.h"
+
 #include <stdexcept>
 #include <utility>
 
@@ -17,16 +19,6 @@ public:
     typedef Value mapped_type;
     typedef std::pair<Key, Value> value_type;
     typedef unsigned int size_type;
-
-    class Node {
-        friend class TernaryTrie;
-        Node *left_, *right_, *equal_, *parent_;
-        TernaryTrie::value_type data; // if data.first.empty(), no data is present
-        unsigned char c;
-    public:
-        Node ( Node *parent, unsigned char c_ ) : left_(nullptr), right_(nullptr), equal_(nullptr), parent_(parent), c(c_) {}
-        ~Node();
-    };
 
     class TernaryTrieIterator {
     public:
@@ -84,17 +76,19 @@ public:
     size_type count (const key_type& k) const;
 
 private:
-    // return a Node* or nullptr if key is not in the tree
-    Node *getNode(Node *subtree, const key_type &key, size_type pos = 0) const;
-    Node *putNode(Node *n, const value_type& value, int depth = 0);
-    Node *clearSubTree(Node *n);
+    typedef TernaryTrieNode<Key,Value> node_type;
 
-    Node *parent(Node *n) const { if (n != nullptr) return n.parent_; return nullptr; }
-    Node *left(Node *n) const { if (n != nullptr) return n->left_; return nullptr; }
-    Node *equal(Node *n) const { if (n != nullptr) return n->equal_; return nullptr; }
-    Node *right(Node *n) const { if (n != nullptr) return n->right_; return nullptr; }
+    // return a node_type* or nullptr if key is not in the tree
+    node_type *getNode(node_type *subtree, const key_type &key, size_type pos = 0) const;
+    node_type *putNode(node_type *n, const value_type& value, int depth = 0);
+    node_type *clearSubTree(node_type *n);
 
-    Node *root;
+    node_type *parent(node_type *n) const { if (n != nullptr) return n.parent_; return nullptr; }
+    node_type *left(node_type *n) const { if (n != nullptr) return n->left_; return nullptr; }
+    node_type *equal(node_type *n) const { if (n != nullptr) return n->equal_; return nullptr; }
+    node_type *right(node_type *n) const { if (n != nullptr) return n->right_; return nullptr; }
+
+    node_type *root;
     size_type size_;
     uint32_t version;
     bool readonly;
@@ -109,19 +103,12 @@ TernaryTrie<Key, Value>::~TernaryTrie() {
 }
 
 template <class Key, class Value>
-TernaryTrie<Key, Value>::Node::~Node() {
-    delete left_;
-    delete equal_;
-    delete right_;
-}
-
-template <class Key, class Value>
 const typename TernaryTrie<Key, Value>::mapped_type& TernaryTrie<Key, Value>::at (const key_type& k)
 const throw (std::out_of_range)
 {
     if (!root)
         throw std::out_of_range("Element not found");
-    Node * n=getNode(root,k);
+    node_type * n=getNode(root,k);
     if (n && n->data.first.size())
         return n->data.second;
     throw std::out_of_range("Element not found");
@@ -133,15 +120,15 @@ throw (std::out_of_range)
 {
     if (!root)
         throw std::out_of_range("Element not found");
-    Node * n = getNode(root,k);
+    node_type * n = getNode(root,k);
     if (n && n->data.first.size())
         return n->data.second;
     throw std::out_of_range("Element not found");
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::Node *
-TernaryTrie<Key, Value>::getNode (Node *subtree, const key_type &key, size_type pos) const
+typename TernaryTrie<Key, Value>::node_type *
+TernaryTrie<Key, Value>::getNode (node_type *subtree, const key_type &key, size_type pos) const
 {
     if (subtree == nullptr)
         return nullptr;
@@ -155,14 +142,14 @@ TernaryTrie<Key, Value>::getNode (Node *subtree, const key_type &key, size_type 
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::Node *TernaryTrie<Key, Value>::putNode (
-                Node *n,
+typename TernaryTrie<Key, Value>::node_type *TernaryTrie<Key, Value>::putNode (
+                node_type *n,
                 const value_type &v,
                 int depth)
 {
     char c=v.first[depth];
     if (n == nullptr) {
-        n = new Node(nullptr,c);
+        n = new node_type(nullptr,c);
     }
     if (c < n->c) {
         n->left_ = putNode(n->left_, v, depth);
@@ -201,7 +188,7 @@ template <class Key, class Value>
 typename TernaryTrie<Key, Value>::size_type
 TernaryTrie<Key, Value>::erase(const key_type &k)
 {
-    Node *n=getNode(root, k);
+    node_type *n=getNode(root, k);
     if (!n)
         return 0;
     if (n->data.first.size()) {
@@ -223,7 +210,7 @@ TernaryTrie<Key, Value>::operator[] (const key_type& k)
 template <class Key, class Value>
 typename TernaryTrie<Key, Value>::size_type TernaryTrie<Key, Value>::count(const key_type& k) const
 {
-    Node *n=getNode(root,k);
+    node_type *n=getNode(root,k);
     return (n && n->data.first.size() != 0);
 }
 
@@ -235,7 +222,7 @@ void TernaryTrie<Key, Value>::clear()
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::Node * TernaryTrie<Key, Value>::clearSubTree(Node *n)
+typename TernaryTrie<Key, Value>::node_type * TernaryTrie<Key, Value>::clearSubTree(node_type *n)
 {
     if (!n)
         return n;
