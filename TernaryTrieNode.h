@@ -1,13 +1,13 @@
 #include <iterator>
 
 template <class Key, class Value>
-class TernaryTrie;
+class Trie;
 
 template <class Key, class Value>
 class TernaryTrieNode {
-    friend class TernaryTrie<Key,Value>;
+    friend class Trie<Key,Value>;
     TernaryTrieNode *left_, *right_, *equal_, *parent_;
-    typename TernaryTrie<Key,Value>::value_type data; // if data.first.empty(), no data is present
+    typename Trie<Key,Value>::value_type data; // if data.first.empty(), no data is present
     unsigned char c;
 public:
     TernaryTrieNode ( TernaryTrieNode *parent, unsigned char c_ ) : left_(nullptr), right_(nullptr), equal_(nullptr), parent_(parent), c(c_) {}

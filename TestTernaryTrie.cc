@@ -11,7 +11,7 @@
 
 /** tests start here **/
 
-typedef TernaryTrie<std::string,int> TT;
+typedef Trie<std::string,int> TT;
 void
 TestTernaryTrie::testInsert()
 {

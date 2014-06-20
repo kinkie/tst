@@ -2,17 +2,13 @@
 #define SQUID_TERNARYTRIE_H_
 
 #include "TernaryTrieNode.h"
+#include "CompactArrayTrieNode.h"
 
 #include <stdexcept>
 #include <utility>
 
-/* for inspiration see:
- * https://github.com/nlehuen/pytst/tree/master/include
- * https://code.google.com/p/tstdb/source/browse/#svn%2Ftrunk%2Fv2%2Fsrc
- * http://algs4.cs.princeton.edu/52trie/TST.java.html
- */
 template <class Key, class Value>
-class TernaryTrie
+class Trie
 {
 public:
     typedef Key key_type;
@@ -20,19 +16,19 @@ public:
     typedef std::pair<Key, Value> value_type;
     typedef unsigned int size_type;
 
-    class TernaryTrieIterator {
+    class TrieIterator {
     public:
     };
 
-    typedef TernaryTrieIterator iterator;
-    typedef const TernaryTrieIterator const_iterator;
+    typedef TrieIterator iterator;
+    typedef const TrieIterator const_iterator;
     // typedef ... reverse_iterator
     // typedef ... const_reverse_iterator
 
-    TernaryTrie();
-    ~TernaryTrie();
+    Trie();
+    ~Trie();
 
-    TernaryTrie& operator  = (const TernaryTrie &);
+    Trie& operator  = (const Trie &);
 
     // iterator begin();
     // const_iterator cbegin() const;
@@ -95,15 +91,15 @@ private:
 };
 
 template <class Key, class Value>
-TernaryTrie<Key, Value>::TernaryTrie() : root(nullptr), size_(0), version(0), readonly(false) { }
+Trie<Key, Value>::Trie() : root(nullptr), size_(0), version(0), readonly(false) { }
 
 template <class Key, class Value>
-TernaryTrie<Key, Value>::~TernaryTrie() {
+Trie<Key, Value>::~Trie() {
     delete root;
 }
 
 template <class Key, class Value>
-const typename TernaryTrie<Key, Value>::mapped_type& TernaryTrie<Key, Value>::at (const key_type& k)
+const typename Trie<Key, Value>::mapped_type& Trie<Key, Value>::at (const key_type& k)
 const throw (std::out_of_range)
 {
     if (!root)
@@ -115,7 +111,7 @@ const throw (std::out_of_range)
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::mapped_type& TernaryTrie<Key, Value>::at (const key_type& k)
+typename Trie<Key, Value>::mapped_type& Trie<Key, Value>::at (const key_type& k)
 throw (std::out_of_range)
 {
     if (!root)
@@ -127,8 +123,8 @@ throw (std::out_of_range)
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::node_type *
-TernaryTrie<Key, Value>::getNode (node_type *subtree, const key_type &key, size_type pos) const
+typename Trie<Key, Value>::node_type *
+Trie<Key, Value>::getNode (node_type *subtree, const key_type &key, size_type pos) const
 {
     if (subtree == nullptr)
         return nullptr;
@@ -142,7 +138,7 @@ TernaryTrie<Key, Value>::getNode (node_type *subtree, const key_type &key, size_
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::node_type *TernaryTrie<Key, Value>::putNode (
+typename Trie<Key, Value>::node_type *Trie<Key, Value>::putNode (
                 node_type *n,
                 const value_type &v,
                 int depth)
@@ -166,8 +162,8 @@ typename TernaryTrie<Key, Value>::node_type *TernaryTrie<Key, Value>::putNode (
 }
 
 template <class Key, class Value>
-typename std::pair<typename TernaryTrie<Key, Value>::iterator, bool>
-TernaryTrie<Key, Value>::insert(const value_type &val)
+typename std::pair<typename Trie<Key, Value>::iterator, bool>
+Trie<Key, Value>::insert(const value_type &val)
 {
     // todo: increment size.
     // todo: enforce readonly
@@ -178,15 +174,15 @@ TernaryTrie<Key, Value>::insert(const value_type &val)
 template <class Key, class Value>
 template <class InputIterator>
 void
-TernaryTrie<Key, Value>::insert(InputIterator first, InputIterator last)
+Trie<Key, Value>::insert(InputIterator first, InputIterator last)
 {
     for (InputIterator i = first; i != last; ++i)
         insert(*i);
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::size_type
-TernaryTrie<Key, Value>::erase(const key_type &k)
+typename Trie<Key, Value>::size_type
+Trie<Key, Value>::erase(const key_type &k)
 {
     node_type *n=getNode(root, k);
     if (!n)
@@ -200,29 +196,29 @@ TernaryTrie<Key, Value>::erase(const key_type &k)
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::mapped_type&
-TernaryTrie<Key, Value>::operator[] (const key_type& k)
+typename Trie<Key, Value>::mapped_type&
+Trie<Key, Value>::operator[] (const key_type& k)
 {
     // TODO: need iterator first
     //return (*((insert(make_pair(k,mapped_type()))).first)).second;
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::size_type TernaryTrie<Key, Value>::count(const key_type& k) const
+typename Trie<Key, Value>::size_type Trie<Key, Value>::count(const key_type& k) const
 {
     node_type *n=getNode(root,k);
     return (n && n->data.first.size() != 0);
 }
 
 template <class Key, class Value>
-void TernaryTrie<Key, Value>::clear()
+void Trie<Key, Value>::clear()
 {
     root = clearSubTree(root);
     // todo: change to "delete root; size_=0;
 }
 
 template <class Key, class Value>
-typename TernaryTrie<Key, Value>::node_type * TernaryTrie<Key, Value>::clearSubTree(node_type *n)
+typename Trie<Key, Value>::node_type * Trie<Key, Value>::clearSubTree(node_type *n)
 {
     if (!n)
         return n;
