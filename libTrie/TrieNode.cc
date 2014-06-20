@@ -24,13 +24,13 @@
 #include <unistd.h>
 #endif
 
-TrieNode::TrieNode() : _privateData(NULL)
+ArrayTrieNode::ArrayTrieNode() : _privateData(NULL)
 {
     for (int i = 0; i < 256; ++i)
         internal[i] = NULL;
 }
 
-TrieNode::~TrieNode()
+ArrayTrieNode::~ArrayTrieNode()
 {
     for (int i = 0; i < 256; ++i)
         delete internal[i];
@@ -38,7 +38,7 @@ TrieNode::~TrieNode()
 
 /* as for find */
 bool
-TrieNode::add(char const *aString, size_t theLength, void *privatedata, TrieCharTransform *transform)
+ArrayTrieNode::add(char const *aString, size_t theLength, void *privatedata, TrieCharTransform *transform)
 {
     /* We trust that privatedata and existant keys have already been checked */
 
@@ -46,7 +46,7 @@ TrieNode::add(char const *aString, size_t theLength, void *privatedata, TrieChar
         int index = transform ? (*transform)(*aString): *aString;
 
         if (!internal[index])
-            internal[index] = new TrieNode;
+            internal[index] = new ArrayTrieNode;
 
         return internal[index]->add(aString + 1, theLength - 1, privatedata, transform);
     } else {
@@ -61,6 +61,41 @@ TrieNode::add(char const *aString, size_t theLength, void *privatedata, TrieChar
     }
 }
 
-#if !_USE_INLINE_
-#include "TrieNode.cci"
-#endif
+CompactArrayTrieNode::CompactArrayTrieNode() : _privateData(NULL), offset(0) {}
+
+CompactArrayTrieNode::~CompactArrayTrieNode() {
+    for (internal_type::iterator i=internal.begin(); i != internal.end(); ++i)
+        delete (*i);
+}
+
+bool
+CompactArrayTrieNode::add(char const *aString, size_t theLength, void *privatedata, TrieCharTransform *transform)
+{
+    if (theLength) {
+        const int idx = transform ? (*transform)(*aString): *aString;
+
+        // check bounds, if necessary extend and shift offset
+        if (internal.empty()) {
+            internal.resize(1,NULL);
+            offset = idx;
+        } else if (static_cast<unsigned int>(idx) < offset) { // before start of relevant section
+            internal.insert(internal.begin(),offset-idx,NULL);
+            offset = idx;
+        } else if (static_cast<unsigned int>(idx) >= offset+internal.size()) {
+            internal.resize(idx-offset+1,NULL);
+        }
+        // proceed as ArrayTrieNode accounting for offset etc
+        const int realIdx = idx-offset;
+        if (!internal[realIdx])
+            internal[realIdx] = new CompactArrayTrieNode;
+        return internal[realIdx]->add(aString + 1, theLength - 1, privatedata, transform);
+
+    } else {
+        /* terminal node */
+        if (_privateData)
+            return false;
+        _privateData = privatedata;
+        return true;
+    }
+
+}
