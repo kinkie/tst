@@ -13,9 +13,16 @@ public:
     typedef typename Trie<Key,Value>::value_type value_type;
     CompactArrayTrieNode();
     ~CompactArrayTrieNode();
-    // should probably use a proper iterator
+    // return a pointer to the stored value of the longest-matching-prefix
+    // (if prefix==true) or exact match; return NULL if nothing is found.
     value_type *find (Key const &, size_t pos, bool const prefix) const;
-    bool add (Key const &, size_t pos, Value &);
+
+    // add a new value_type made of Key and Value in the position pointed
+    // to by Key. This method is meant to be called on the root node of the
+    // Trie; will recurse on the internal variant by the same name.
+    // returns false if the string can't be added.
+    // will overwrite previously-set data with the same key
+    bool add (Key const &, Value &);
 
 private:
     typedef std::vector<CompactArrayTrieNode *> children_t;
@@ -29,6 +36,7 @@ private:
     CompactArrayTrieNode(const CompactArrayTrieNode&);
     CompactArrayTrieNode& operator= (CompactArrayTrieNode const &);
 
+    bool add (Key const &, Value &, size_t pos);
 };
 
 template <class Key, class Value>
@@ -60,6 +68,27 @@ CompactArrayTrieNode<Key,Value>::find (Key const & key, size_t pos, bool const p
             return &data;
         return NULL;
     }
+}
+
+template <class Key, class Value>
+bool
+CompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v)
+{
+    return add(k,v,0);
+}
+
+template <class Key, class Value>
+bool
+CompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v, size_t pos)
+{
+    if (pos == k.size()) {
+        haveData = true;
+        data = std::make_pair(k,v);
+        return true;
+    }
+    //TODO: we are here
+    return false;
+
 }
 
 #endif /* SQUID_COMPACTARRAYTRIENODE_H_ */
