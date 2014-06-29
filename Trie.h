@@ -72,17 +72,12 @@ public:
     size_type count (const key_type& k) const;
 
 private:
-    typedef TernaryTrieNode<Key,Value> node_type;
+    typedef CompactArrayTrieNode<Key,Value> node_type;
 
     // return a node_type* or nullptr if key is not in the tree
-    node_type *getNode(node_type *subtree, const key_type &key, size_type pos = 0) const;
+    node_type *getNode(const key_type &key) const;
     node_type *putNode(node_type *n, const value_type& value, int depth = 0);
     node_type *clearSubTree(node_type *n);
-
-    node_type *parent(node_type *n) const { if (n != nullptr) return n.parent_; return nullptr; }
-    node_type *left(node_type *n) const { if (n != nullptr) return n->left_; return nullptr; }
-    node_type *equal(node_type *n) const { if (n != nullptr) return n->equal_; return nullptr; }
-    node_type *right(node_type *n) const { if (n != nullptr) return n->right_; return nullptr; }
 
     node_type *root;
     size_type size_;
@@ -116,25 +111,16 @@ throw (std::out_of_range)
 {
     if (!root)
         throw std::out_of_range("Element not found");
-    node_type * n = getNode(root,k);
-    if (n && n->data.first.size())
-        return n->data.second;
-    throw std::out_of_range("Element not found");
+    //TODO
 }
 
 template <class Key, class Value>
 typename Trie<Key, Value>::node_type *
-Trie<Key, Value>::getNode (node_type *subtree, const key_type &key, size_type pos) const
+Trie<Key, Value>::getNode (const key_type &key) const
 {
-    if (subtree == nullptr)
+    if (root == nullptr)
         return nullptr;
-    if (key[pos] < subtree->c)
-        return getNode(left(subtree), key, pos); // will return nullptr if subtree doesn't exist
-    if (key[pos] > subtree->c)
-        return getNode(right(subtree), key, pos);  // will return nullptr if subtree doesn't exist
-    if (pos < key.size()-1)
-        return getNode(equal(subtree), key, pos+1);
-    return subtree;
+    return root->find(key);
 }
 
 template <class Key, class Value>
@@ -165,10 +151,7 @@ template <class Key, class Value>
 typename std::pair<typename Trie<Key, Value>::iterator, bool>
 Trie<Key, Value>::insert(const value_type &val)
 {
-    // todo: increment size.
-    // todo: enforce readonly
-    root = putNode(root, val);
-    return std::make_pair(iterator(), true); //todo: return a real iterator
+    //todo
 }
 
 template <class Key, class Value>
@@ -184,14 +167,7 @@ template <class Key, class Value>
 typename Trie<Key, Value>::size_type
 Trie<Key, Value>::erase(const key_type &k)
 {
-    node_type *n=getNode(root, k);
-    if (!n)
-        return 0;
-    if (n->data.first.size()) {
-        n->data = value_type();
-        --size_; //todo
-        return 1;
-    }
+    //todo
     return 0;
 }
 
@@ -206,28 +182,18 @@ Trie<Key, Value>::operator[] (const key_type& k)
 template <class Key, class Value>
 typename Trie<Key, Value>::size_type Trie<Key, Value>::count(const key_type& k) const
 {
-    node_type *n=getNode(root,k);
-    return (n && n->data.first.size() != 0);
+    //todo
 }
 
 template <class Key, class Value>
 void Trie<Key, Value>::clear()
 {
-    root = clearSubTree(root);
-    // todo: change to "delete root; size_=0;
 }
 
 template <class Key, class Value>
 typename Trie<Key, Value>::node_type * Trie<Key, Value>::clearSubTree(node_type *n)
 {
-    if (!n)
-        return n;
-    n->left_ = clearSubTree(left(n)); // need to reset pointers or ~Node will double-free
-    n->equal_ = clearSubTree(equal(n));
-    n->right_ = clearSubTree(right(n));
-    if (n->data.first.size())
-        --size_;
-    delete n;
     return nullptr;
+    //todo
 }
 #endif /* SQUID_TERNARYTRIE_H_ */
