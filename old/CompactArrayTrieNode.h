@@ -7,6 +7,12 @@
 template <class Key, class Value> class Trie;
 
 template <class Key, class Value>
+class CompactArrayTrieNodeIterator
+{
+
+};
+
+template <class Key, class Value>
 class CompactArrayTrieNode
 {
 public:

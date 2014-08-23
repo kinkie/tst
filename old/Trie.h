@@ -30,8 +30,8 @@ public:
 
     Trie& operator  = (const Trie &);
 
-    // iterator begin();
-    // const_iterator cbegin() const;
+    iterator begin() { return TrieIterator(); } // stub
+    const_iterator cbegin() const { return TrieIterator(); } // stub
     // iterator end();
     // const_iterator cend() const;
     // reverse_iterator rbegin();
@@ -121,30 +121,6 @@ Trie<Key, Value>::getNode (const key_type &key) const
     if (root == nullptr)
         return nullptr;
     return root->find(key);
-}
-
-template <class Key, class Value>
-typename Trie<Key, Value>::node_type *Trie<Key, Value>::putNode (
-                node_type *n,
-                const value_type &v,
-                int depth)
-{
-    char c=v.first[depth];
-    if (n == nullptr) {
-        n = new node_type(nullptr,c);
-    }
-    if (c < n->c) {
-        n->left_ = putNode(n->left_, v, depth);
-    } else if (c > n->c) {
-        n->right_ = putNode(n->right_, v, depth);
-    } else if (depth < v.first.size() -1) {
-        n->equal_ = putNode(n->equal_, v, depth+1);
-    } else {
-        if (n->data.first.size() == 0)
-            ++size_;
-        n->data = v;
-    }
-    return n;
 }
 
 template <class Key, class Value>
