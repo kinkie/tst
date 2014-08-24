@@ -9,14 +9,13 @@ template <class Key, class Value> class Trie;
 template <class Key, class Value>
 class CompactArrayTrieNodeIterator
 {
-
 };
 
 template <class Key, class Value>
 class CompactArrayTrieNode
 {
 public:
-    typedef typename Trie<Key,Value>::value_type value_type;
+    typedef std::pair<Key, Value> value_type;
     CompactArrayTrieNode();
     ~CompactArrayTrieNode();
     // return a pointer to the stored value of the longest-matching-prefix
@@ -31,9 +30,9 @@ public:
     bool add (Key const &, Value &);
 
 private:
-    typedef std::vector<CompactArrayTrieNode *> children_t;
+    typedef std::vector<CompactArrayTrieNode *> children_type;
 
-    children_t children;
+    children_type children;
     value_type data;
     int offset;
     bool haveData;
@@ -53,7 +52,7 @@ CompactArrayTrieNode<Key,Value>::CompactArrayTrieNode() :
 template <class Key, class Value>
 CompactArrayTrieNode<Key,Value>::~CompactArrayTrieNode()
 {
-    for (typename children_t::iterator i=children.begin(); i != children.end(); ++i)
+    for (typename children_type::iterator i=children.begin(); i != children.end(); ++i)
         delete *i; // handles nullptr automatically
     // no need to handle data type, it has by-value semantics
 }

@@ -1,7 +1,7 @@
 CXX=/usr/bin/g++
 CFLAGS = -g
 CXXFLAGS = -g -std=c++11
-TESTS = TestTernaryTrie
+TESTS = TestCompactArrayTrieNode
 #LIBS = libTernaryTrie.a
 
 all: $(LIBS) check
@@ -16,4 +16,7 @@ clean:
 #	ar cru $@ $^
 #	
 TestTernaryTrie: TestTernaryTrie.o Trie.h TernaryTrieNode.h
+	g++ $(CXXFLAGS) $^ -o $@ -lcppunit
+
+TestCompactArrayTrieNode: TestCompactArrayTrieNode.o CompactArrayTrieNode.h
 	g++ $(CXXFLAGS) $^ -o $@ -lcppunit
