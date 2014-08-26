@@ -1,5 +1,5 @@
-#ifndef SQUID_COMPACTARRAYTRIENODE_H_
-#define SQUID_COMPACTARRAYTRIENODE_H_
+#ifndef SQUID_OldCompactArrayTrieNode_H_
+#define SQUID_OldCompactArrayTrieNode_H_
 
 #include <iterator>
 #include <vector>
@@ -7,20 +7,20 @@
 template <class Key, class Value> class Trie;
 
 template <class Key, class Value>
-class CompactArrayTrieNodeIterator
+class OldCompactArrayTrieNodeIterator
 {
 };
 
 template <class Key, class Value>
-class CompactArrayTrieNode
+class OldCompactArrayTrieNode
 {
 public:
     typedef std::pair<Key, Value> value_type;
-    CompactArrayTrieNode();
-    ~CompactArrayTrieNode();
+    OldCompactArrayTrieNode();
+    ~OldCompactArrayTrieNode();
     // return a pointer to the stored value of the longest-matching-prefix
     // (if prefix==true) or exact match; return NULL if nothing is found.
-    CompactArrayTrieNode *find (Key const &, size_t pos = 0, bool const prefix = false) const;
+    const OldCompactArrayTrieNode *find (Key const &, size_t pos = 0, bool const prefix = false) const;
 
     // add a new value_type made of Key and Value in the position pointed
     // to by Key. This method is meant to be called on the root node of the
@@ -30,7 +30,7 @@ public:
     bool add (Key const &, Value &);
 
 private:
-    typedef std::vector<CompactArrayTrieNode *> children_type;
+    typedef std::vector<OldCompactArrayTrieNode *> children_type;
 
     children_type children;
     value_type data;
@@ -38,19 +38,19 @@ private:
     bool haveData;
 
     /* not implemented */
-    CompactArrayTrieNode(const CompactArrayTrieNode&);
-    CompactArrayTrieNode& operator= (CompactArrayTrieNode const &);
+    OldCompactArrayTrieNode(const OldCompactArrayTrieNode&);
+    OldCompactArrayTrieNode& operator= (OldCompactArrayTrieNode const &);
 
     bool add (Key const &, Value &, size_t pos);
 };
 
 template <class Key, class Value>
-CompactArrayTrieNode<Key,Value>::CompactArrayTrieNode() :
+OldCompactArrayTrieNode<Key,Value>::OldCompactArrayTrieNode() :
     offset(0), haveData(false)
 {}
 
 template <class Key, class Value>
-CompactArrayTrieNode<Key,Value>::~CompactArrayTrieNode()
+OldCompactArrayTrieNode<Key,Value>::~OldCompactArrayTrieNode()
 {
     for (typename children_type::iterator i=children.begin(); i != children.end(); ++i)
         delete *i; // handles nullptr automatically
@@ -59,8 +59,8 @@ CompactArrayTrieNode<Key,Value>::~CompactArrayTrieNode()
 
 
 template <class Key, class Value>
-CompactArrayTrieNode<Key,Value> *
-CompactArrayTrieNode<Key,Value>::find (Key const & key, size_t pos, bool const prefix) const
+OldCompactArrayTrieNode<Key,Value> *
+OldCompactArrayTrieNode<Key,Value>::find (Key const & key, size_t pos, bool const prefix) const
 {
     if (pos < key.size()) {
         // todo: charTransform?
@@ -86,14 +86,14 @@ CompactArrayTrieNode<Key,Value>::find (Key const & key, size_t pos, bool const p
 
 template <class Key, class Value>
 bool
-CompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v)
+OldCompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v)
 {
     return add(k,v,0);
 }
 
 template <class Key, class Value>
 bool
-CompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v, size_t pos)
+OldCompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v, size_t pos)
 {
     // terminal node in the string. Add data here.
     if (pos == k.size()) {
@@ -113,8 +113,8 @@ CompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v, size_t pos)
     }
     const size_t actual_slot = slot - offset;
     if (!children[actual_slot])
-        children[actual_slot] = new CompactArrayTrieNode;
+        children[actual_slot] = new OldCompactArrayTrieNode;
     return children[actual_slot]->add(k,v,pos+1);
 }
 
-#endif /* SQUID_COMPACTARRAYTRIENODE_H_ */
+#endif /* SQUID_OldCompactArrayTrieNode_H_ */
