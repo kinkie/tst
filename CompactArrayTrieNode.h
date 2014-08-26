@@ -15,16 +15,27 @@ public:
     CompactArrayTrieNode();
     ~CompactArrayTrieNode();
 
+    // return a pointer to the node corresponding to the char, or nullptr
+    // if not found
+    CompactArrayTrieNode *find (int character);
+
     // return a pointer to the stored value of the longest-matching-prefix
-    // (if prefix==true) o  r exact match; return NULL if nothing is found.
-    CompactArrayTrieNode *find (Key const &, size_t pos = 0, bool const prefix = false) const;
+    // (if prefix==true) or exact match; return NULL if nothing is found.
+    CompactArrayTrieNode *recursiveFind (Key const &, size_t pos = 0, bool const prefix = false);
 
     // add a new value_type made of Key and Value in the position pointed
     // to by Key. This method is meant to be called on the root node of the
     // Trie; will recurse on the internal variant by the same name.
     // returns false if the string can't be added.
     // will overwrite previously-set data with the same key
-    bool add (Key const &, Value);
+    bool recursiveAdd (Key const &, Value);
+
+    CompactArrayTrieNodeIterator<Key,Value> begin() {
+        return CompactArrayTrieNodeIterator<Key,Value>(this, children.begin());
+    }
+    CompactArrayTrieNodeIterator<Key,Value> end() {
+        return CompactArrayTrieNodeIterator<Key,Value>(this, children.end());
+    }
 
 private:
     typedef std::vector<CompactArrayTrieNode *> children_type;
@@ -38,7 +49,7 @@ private:
     CompactArrayTrieNode(const CompactArrayTrieNode&);
     CompactArrayTrieNode& operator= (CompactArrayTrieNode const &);
 
-    bool add (Key const &, Value &, size_t pos);
+    bool recursiveAdd (Key const &, Value &, size_t pos);
     friend class CompactArrayTrieNodeIterator<Key,Value>;
 };
 
@@ -58,23 +69,20 @@ CompactArrayTrieNode<Key,Value>::~CompactArrayTrieNode()
 
 template <class Key, class Value>
 CompactArrayTrieNode<Key,Value> *
-CompactArrayTrieNode<Key,Value>::find (Key const & key, size_t pos, bool const prefix) const
+CompactArrayTrieNode<Key,Value>::recursiveFind (Key const & key, size_t pos, bool const prefix)
 {
     if (pos < key.size()) {
         // todo: charTransform?
         int character = key[pos];
-        int realPos = -1;
-
-        if (character >= offset && character - offset < children.size() )
-            realPos = character - offset;
-        if (realPos >= 0 && children[realPos]) {
-            CompactArrayTrieNode *result = children[realPos]->find(key, pos+1, prefix);
-            if (result)
-                return result;
-        }
+        const CompactArrayTrieNode *child = find(character);
+        CompactArrayTrieNode *result = nullptr;
+        if (child)
+             result = find(character)->recursiveFind(key, pos+1, prefix);
+        if (result)
+            return result;
         if (prefix && haveData)
             return this;
-        return NULL;
+        return nullptr;
     } else {
         if (haveData)
             return this;
@@ -83,15 +91,28 @@ CompactArrayTrieNode<Key,Value>::find (Key const & key, size_t pos, bool const p
 }
 
 template <class Key, class Value>
-bool
-CompactArrayTrieNode<Key,Value>::add(Key const &k , Value v)
+CompactArrayTrieNode<Key,Value> *
+CompactArrayTrieNode<Key,Value>::find (int character)
 {
-    return add(k,v,0);
+    int realPos = -1;
+    if (character >= offset && character - offset < children.size() )
+        realPos = character - offset;
+    if (realPos >= 0 && children[realPos])
+        return children[realPos];
+    return nullptr;
+}
+
+
+template <class Key, class Value>
+bool
+CompactArrayTrieNode<Key,Value>::recursiveAdd(Key const &k , Value v)
+{
+    return recursiveAdd(k,v,0);
 }
 
 template <class Key, class Value>
 bool
-CompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v, size_t pos)
+CompactArrayTrieNode<Key,Value>::recursiveAdd(Key const &k , Value &v, size_t pos)
 {
     // terminal node in the string. Add data here.
     if (pos == k.size()) {
@@ -112,23 +133,35 @@ CompactArrayTrieNode<Key,Value>::add(Key const &k , Value &v, size_t pos)
     const size_t actual_slot = slot - offset;
     if (!children[actual_slot])
         children[actual_slot] = new CompactArrayTrieNode;
-    return children[actual_slot]->add(k,v,pos+1);
+    return children[actual_slot]->recursiveAdd(k,v,pos+1);
 }
 
+
+// nonrecursive iterator. iterates through pointers to the children of a node
 template <class Key, class Value>
 class CompactArrayTrieNodeIterator
                 : public std::iterator<std::forward_iterator_tag, CompactArrayTrieNode<Key,Value> >
 {
     typedef typename CompactArrayTrieNode<Key,Value>::children_type::iterator base_type;
     CompactArrayTrieNode<Key,Value> *node;
-    base_type baseIterator;
+    base_type childrenIter;
 
     /* no default constructor */
     CompactArrayTrieNodeIterator();
 public:
     CompactArrayTrieNodeIterator(CompactArrayTrieNode<Key,Value>* n, base_type i) :
-        baseIterator(i), node(n) {}
-
+        childrenIter(i), node(n) {}
+    bool operator ==(const CompactArrayTrieNodeIterator& i) {
+        return node==i.node && childrenIter==i.childrenIter;
+    }
+    bool operator !=(const CompactArrayTrieNodeIterator& i) {
+        return !operator==(i);
+    }
+//    CompactArrayTrieNodeIterator& operator++() {
+//        while (childrenIter != node->end() && *childrenIter == nullptr)
+//            ++childrenIter;
+//        return this;
+//    }
 };
 
 

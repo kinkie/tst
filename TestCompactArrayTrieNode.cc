@@ -13,20 +13,34 @@ void
 TestCompactArrayTrieNode::addToNode()
 {
     CompactArrayTrieNode<std::string,int> tn;
-    CPPUNIT_ASSERT_EQUAL(true, tn.add("foo",1));
-    CPPUNIT_ASSERT_EQUAL(true, tn.add("bar",2));
+    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("foo",1));
+    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("bar",2));
     int i=3;
-    CPPUNIT_ASSERT_EQUAL(true, tn.add("gazonk",i)); // non-const value
-    CPPUNIT_ASSERT_EQUAL(true, tn.add("foo",4)); // overwrite
+    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("gazonk",i)); // non-const value
+    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("foo",4)); // overwrite
 }
 
 void
 TestCompactArrayTrieNode::findInNode()
 {
     CompactArrayTrieNode<std::string,int> tn;
-    tn.add("foo",1);
-    tn.add("bar",2);
-    tn.find("foo") != nullptr;
+    tn.recursiveAdd("foo",1);
+    tn.recursiveAdd("bar",2);
+    CPPUNIT_ASSERT(tn.recursiveFind("foo") != nullptr);
+    CPPUNIT_ASSERT(tn.recursiveFind("gazonk") == nullptr);
+}
+
+void
+TestCompactArrayTrieNode::nodeIterator()
+{
+    CompactArrayTrieNode<std::string,int> t1, t2;
+    t1.recursiveAdd("foo",1);
+    t1.recursiveAdd("bar",2);
+    t2.recursiveAdd("foo",1);
+    t2.recursiveAdd("bar",2);
+    CPPUNIT_ASSERT(t1.begin() != t2.begin());
+    CPPUNIT_ASSERT(t1.begin() == t1.begin());
+    CPPUNIT_ASSERT(t1.begin() != t1.end());
 }
 
 /*** boilerplate starts here ***/
@@ -60,4 +74,5 @@ main (int argc, char ** argv)
 
     return result.wasSuccessful() ? 0 : 1;
 }
+
 

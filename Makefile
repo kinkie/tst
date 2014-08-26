@@ -15,8 +15,8 @@ clean:
 #libTernaryTrie.a: TernaryTrie.o
 #	ar cru $@ $^
 #	
-TestTernaryTrie: TestTernaryTrie.o Trie.h TernaryTrieNode.h
-	g++ $(CXXFLAGS) $^ -o $@ -lcppunit
 
-TestCompactArrayTrieNode: TestCompactArrayTrieNode.o CompactArrayTrieNode.h
-	g++ $(CXXFLAGS) $^ -o $@ -lcppunit
+TestCompactArrayTrieNode.o: CompactArrayTrieNode.h TestCompactArrayTrieNode.cc TestCompactArrayTrieNode.h
+
+TestCompactArrayTrieNode: TestCompactArrayTrieNode.o
+	g++ $(CXXFLAGS) $< -o $@ -lcppunit

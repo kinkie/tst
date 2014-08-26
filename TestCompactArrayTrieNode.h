@@ -12,6 +12,7 @@ class TestCompactArrayTrieNode  : public CPPUNIT_NS::TestFixture
 //    CPPUNIT_TEST(  );
     CPPUNIT_TEST( addToNode );
     CPPUNIT_TEST( findInNode );
+    CPPUNIT_TEST( nodeIterator );
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -19,6 +20,7 @@ protected:
 //  void testWhatever();
     void addToNode();
     void findInNode();
+    void nodeIterator();
 };
 
 #endif /* SQUID_TESTTERNARYTRIE_H_ */
