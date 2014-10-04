@@ -66,7 +66,6 @@ CompactArrayTrieNode<Key,Value>::~CompactArrayTrieNode()
     // no need to handle data type, it has by-value semantics
 }
 
-
 template <class Key, class Value>
 CompactArrayTrieNode<Key,Value> *
 CompactArrayTrieNode<Key,Value>::recursiveFind (Key const & key, size_t pos, bool const prefix)
@@ -149,19 +148,28 @@ class CompactArrayTrieNodeIterator
     /* no default constructor */
     CompactArrayTrieNodeIterator();
 public:
-    CompactArrayTrieNodeIterator(CompactArrayTrieNode<Key,Value>* n, base_type i) :
+    // only public constructor, taking a pointer to a CompactArrayTrieNode (for begin and end) and
+    // to a forward iterator which supplies the underlying implementation
+        CompactArrayTrieNodeIterator(CompactArrayTrieNode<Key,Value>* n, base_type i) :
         childrenIter(i), node(n) {}
+    
+    // equality tests
     bool operator ==(const CompactArrayTrieNodeIterator& i) {
         return node==i.node && childrenIter==i.childrenIter;
     }
     bool operator !=(const CompactArrayTrieNodeIterator& i) {
         return !operator==(i);
     }
-//    CompactArrayTrieNodeIterator& operator++() {
-//        while (childrenIter != node->end() && *childrenIter == nullptr)
-//            ++childrenIter;
-//        return this;
-//    }
+    // increment operator. Calls the base class' increment, skipping over empty children
+    CompactArrayTrieNodeIterator& operator++() {
+        while (childrenIter != node->end() && *childrenIter == nullptr)
+            ++childrenIter;
+        return this;
+    }
+    // dereference
+    typename CompactArrayTrieNode<Key,Value>::children_type operator *() {
+        return *childrenIter;
+    }
 };
 
 

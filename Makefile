@@ -1,6 +1,8 @@
 CXX=/usr/bin/g++
-CFLAGS = -g
-CXXFLAGS = -g -std=c++11
+INCLUDES=-I/opt/local/include
+CFLAGS = -g $(INCLUDES)
+CXXFLAGS = -g -std=c++11 $(INCLUDES)
+LDFLAGS=-L/opt/local/lib
 TESTS = TestCompactArrayTrieNode
 #LIBS = libTernaryTrie.a
 
@@ -19,4 +21,4 @@ clean:
 TestCompactArrayTrieNode.o: CompactArrayTrieNode.h TestCompactArrayTrieNode.cc TestCompactArrayTrieNode.h
 
 TestCompactArrayTrieNode: TestCompactArrayTrieNode.o
-	g++ $(CXXFLAGS) $< -o $@ -lcppunit
+	g++ $(CXXFLAGS) $(LDFLAGS) $< -o $@ -lcppunit
