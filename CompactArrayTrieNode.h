@@ -3,7 +3,10 @@
 
 #include <iterator>
 #include <vector>
+#include <stack>
 
+template <class Key, class Value>
+class CompactArrayTrieBaseNodeIterator;
 template <class Key, class Value>
 class CompactArrayTrieNodeIterator;
 
@@ -30,11 +33,12 @@ public:
     // will overwrite previously-set data with the same key
     bool recursiveAdd (Key const &, Value);
 
+    typedef CompactArrayTrieNodeIterator<Key,Value> iterator;
     CompactArrayTrieNodeIterator<Key,Value> begin() {
-        return CompactArrayTrieNodeIterator<Key,Value>(this, children.begin());
+        return iterator(this, children.begin());
     }
     CompactArrayTrieNodeIterator<Key,Value> end() {
-        return CompactArrayTrieNodeIterator<Key,Value>(this, children.end());
+        return iterator(this, children.end());
     }
 
 private:
@@ -50,6 +54,7 @@ private:
     CompactArrayTrieNode& operator= (CompactArrayTrieNode const &);
 
     bool recursiveAdd (Key const &, Value &, size_t pos);
+    friend class CompactArrayTrieBaseNodeIterator<Key,Value>;
     friend class CompactArrayTrieNodeIterator<Key,Value>;
 };
 
@@ -135,10 +140,9 @@ CompactArrayTrieNode<Key,Value>::recursiveAdd(Key const &k , Value &v, size_t po
     return children[actual_slot]->recursiveAdd(k,v,pos+1);
 }
 
-
 // nonrecursive iterator. iterates through pointers to the children of a node
 template <class Key, class Value>
-class CompactArrayTrieNodeIterator
+class CompactArrayTrieBaseNodeIterator
                 : public std::iterator<std::forward_iterator_tag, CompactArrayTrieNode<Key,Value> >
 {
     typedef typename CompactArrayTrieNode<Key,Value>::children_type::iterator base_type;
@@ -146,22 +150,22 @@ class CompactArrayTrieNodeIterator
     base_type childrenIter;
 
     /* no default constructor */
-    CompactArrayTrieNodeIterator();
+    CompactArrayTrieBaseNodeIterator();
 public:
     // only public constructor, taking a pointer to a CompactArrayTrieNode (for begin and end) and
     // to a forward iterator which supplies the underlying implementation
-        CompactArrayTrieNodeIterator(CompactArrayTrieNode<Key,Value>* n, base_type i) :
+    CompactArrayTrieBaseNodeIterator(CompactArrayTrieNode<Key,Value>* n, base_type i) :
         childrenIter(i), node(n) {}
     
     // equality tests
-    bool operator ==(const CompactArrayTrieNodeIterator& i) {
-        return node==i.node && childrenIter==i.childrenIter;
+    bool operator ==(const CompactArrayTrieBaseNodeIterator& i) {
+        return childrenIter==i.childrenIter;
     }
-    bool operator !=(const CompactArrayTrieNodeIterator& i) {
+    bool operator !=(const CompactArrayTrieBaseNodeIterator& i) {
         return !operator==(i);
     }
     // increment operator. Calls the base class' increment, skipping over empty children
-    CompactArrayTrieNodeIterator& operator++() {
+    CompactArrayTrieBaseNodeIterator& operator++() {
         while (childrenIter != node->end() && *childrenIter == nullptr)
             ++childrenIter;
         return this;
@@ -172,5 +176,31 @@ public:
     }
 };
 
+template <class Key, class Value>
+class CompactArrayTrieNodeIterator
+                : public std::iterator<std::forward_iterator_tag, CompactArrayTrieNode<Key,Value> >
+{
+    typedef std::stack<CompactArrayTrieBaseNodeIterator<Key,Value> > iter_state_type;
+    typedef typename CompactArrayTrieNode<Key,Value>::children_type::iterator base_type;
 
+    iter_state_type iter_state;
+
+    /* no default constructor */
+    CompactArrayTrieNodeIterator();
+
+public:
+    CompactArrayTrieNodeIterator(CompactArrayTrieNode<Key,Value>* n, base_type i)
+    {
+        iter_state.push(CompactArrayTrieBaseNodeIterator<Key,Value>(n,i));
+    }
+
+    // equality tests
+    bool operator ==(const CompactArrayTrieNodeIterator& i) {
+        return iter_state.top() == i.iter_state.top();
+    }
+    bool operator !=(const CompactArrayTrieNodeIterator& i) {
+        return !operator==(i);
+    }
+
+};
 #endif /* SQUID_COMPACTARRAYTRIENODE_H_ */
