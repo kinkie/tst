@@ -180,7 +180,8 @@ template <class Key, class Value>
 class CompactArrayTrieNodeIterator
                 : public std::iterator<std::forward_iterator_tag, CompactArrayTrieNode<Key,Value> >
 {
-    typedef std::stack<CompactArrayTrieBaseNodeIterator<Key,Value> > iter_state_type;
+    typedef CompactArrayTrieBaseNodeIterator<Key,Value> base_iter_type;
+    typedef std::stack<base_iter_type> iter_state_type;
     typedef typename CompactArrayTrieNode<Key,Value>::children_type::iterator base_type;
 
     iter_state_type iter_state;
@@ -202,5 +203,8 @@ public:
         return !operator==(i);
     }
 
+    CompactArrayTrieNodeIterator& operator++() {
+        //TODO
+    }
 };
 #endif /* SQUID_COMPACTARRAYTRIENODE_H_ */
