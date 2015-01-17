@@ -12,11 +12,13 @@ class TestCompactTrie  : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE( TestCompactTrie );
     CPPUNIT_TEST( testInsert );
+    CPPUNIT_TEST( testFind );
 //    CPPUNIT_TEST(  );
     CPPUNIT_TEST_SUITE_END();
 
 protected:
     void testInsert();
+    void testFind();
 //  void testWhatever();
 };
 

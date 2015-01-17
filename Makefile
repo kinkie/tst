@@ -20,7 +20,7 @@ clean:
 
 TestCompactArrayTrieNode.o: CompactArrayTrieNode.h TestCompactArrayTrieNode.cc TestCompactArrayTrieNode.h
 
-testCompactTrie.o: testCompactTrie.cc testCompactTrie.h CompactArrayTrieNode.h
+testCompactTrie.o: testCompactTrie.cc testCompactTrie.h CompactTrie.h CompactArrayTrieNode.h
 
 TestCompactArrayTrieNode: TestCompactArrayTrieNode.o
 	g++ $(CXXFLAGS) $(LDFLAGS) $< -o $@ -lcppunit

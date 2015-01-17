@@ -18,6 +18,20 @@ TestCompactTrie::testInsert()
     ct.insert("bar",2);
     CPPUNIT_ASSERT(ct.has("foo"));
     CPPUNIT_ASSERT(ct.has("bar"));
+    CPPUNIT_ASSERT(!ct.has("gazonk"));
+}
+
+void
+TestCompactTrie::testFind()
+{
+    CT ct;
+    ct.insert("foo",1);
+    ct.insert("bar",2);
+    CT::value_type rv = ct.find("foo");
+    CPPUNIT_ASSERT(rv != ct.end());
+    CPPUNIT_ASSERT_EQUAL(rv.second,1);
+    CPPUNIT_ASSERT(ct.find("gazonk") == ct.end());
+    // todo: check that ct.end() is really unique
 }
 
 

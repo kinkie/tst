@@ -30,8 +30,8 @@ public:
         return (root.recursiveFind(k, 0, prefix) != nullptr);
     }
 
-    bool find(const key_type &k, const bool prefix = false) {
-        node_type *f=root.find(k,prefix);
+    value_type find(const key_type &k, const bool prefix = false) {
+        node_type *f=root.recursiveFind(k, 0, prefix);
         if (f == nullptr)
             return end();
         return f->data;
