@@ -3,7 +3,7 @@ INCLUDES=-I/opt/local/include
 CFLAGS = -g $(INCLUDES)
 CXXFLAGS = -g -std=c++11 $(INCLUDES)
 LDFLAGS=-L/opt/local/lib
-TESTS = TestCompactArrayTrieNode
+TESTS = TestCompactArrayTrieNode testCompactTrie
 #LIBS = libTernaryTrie.a
 
 all: $(LIBS) check
@@ -20,5 +20,10 @@ clean:
 
 TestCompactArrayTrieNode.o: CompactArrayTrieNode.h TestCompactArrayTrieNode.cc TestCompactArrayTrieNode.h
 
+testCompactTrie.o: testCompactTrie.cc testCompactTrie.h CompactArrayTrieNode.h
+
 TestCompactArrayTrieNode: TestCompactArrayTrieNode.o
+	g++ $(CXXFLAGS) $(LDFLAGS) $< -o $@ -lcppunit
+
+testCompactTrie: testCompactTrie.o CompactTrie.o
 	g++ $(CXXFLAGS) $(LDFLAGS) $< -o $@ -lcppunit

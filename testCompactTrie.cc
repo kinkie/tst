@@ -1,5 +1,4 @@
-#include "TestCompactArrayTrieNode.h"
-#include "CompactArrayTrieNode.h"
+#include "testCompactTrie.h"
 
 #include <cppunit/BriefTestProgressListener.h>
 #include <cppunit/TextTestProgressListener.h>
@@ -9,35 +8,22 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 
-void
-TestCompactArrayTrieNode::addToNode()
-{
-    CompactArrayTrieNode<std::string,int> tn;
-    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("foo",1));
-    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("bar",2));
-    int i=3;
-    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("gazonk",i)); // non-const value
-    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("foo",4)); // overwrite
-}
+typedef CompactTrie<std::string, int> CT;
 
 void
-TestCompactArrayTrieNode::findInNode()
+TestCompactTrie::testInsert()
 {
-    CompactArrayTrieNode<std::string,int> tn;
-    tn.recursiveAdd("foo",1);
-    tn.recursiveAdd("bar",2);
-    CPPUNIT_ASSERT(tn.recursiveFind("foo") != nullptr);
-    CPPUNIT_ASSERT(tn.recursiveFind("gazonk") == nullptr);
+    CT ct;
+    ct.insert("foo",1);
+    ct.insert("bar",2);
+    CPPUNIT_ASSERT(ct.has("foo"));
+    CPPUNIT_ASSERT(ct.has("bar"));
 }
 
-void
-TestCompactArrayTrieNode::nodeIterator()
-{
-}
 
 /*** boilerplate starts here ***/
 
-CPPUNIT_TEST_SUITE_REGISTRATION( TestCompactArrayTrieNode );
+CPPUNIT_TEST_SUITE_REGISTRATION( TestCompactTrie );
 
 int
 main (int argc, char ** argv)
