@@ -38,7 +38,7 @@ public:
     }
 
     value_type prefixFind(const key_type & k) {
-        node_type *f=root.recursiveFind(k,0,true);
+        node_type *f=root.recursivePrefixFind(k);
         if (f == nullptr)
             return end();
         return f->data;

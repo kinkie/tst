@@ -27,14 +27,33 @@ TestCompactTrie::testFind()
     CT ct;
     ct.insert("foo",1);
     ct.insert("bar",2);
-    CT::value_type rv = ct.find("foo");
-    CPPUNIT_ASSERT(rv != ct.end());
-    CPPUNIT_ASSERT_EQUAL(rv.second,1);
-    CPPUNIT_ASSERT(ct.find("gazonk") == ct.end());
+    ct.insert("foo.",3);
+    {
+        CT::value_type rv = ct.find("foo");
+        CPPUNIT_ASSERT(rv != ct.end()); // found
+        CPPUNIT_ASSERT_EQUAL(rv.second,1); // mapped data match
+        CPPUNIT_ASSERT(ct.find("gazonk") == ct.end()); // not found
+    }
 
-    CT::value_type test_end = std::make_pair(std::string(), int());
-    CPPUNIT_ASSERT(ct.find("gazonk") != test_end);
+    {
+        // check CompactTrie::end() uniqueness
+        CT::value_type test_end = std::make_pair(std::string(), int());
+        CPPUNIT_ASSERT(ct.find("gazonk") != test_end);
+    }
 
+    {
+        // prefix find tests
+        CT::value_type rv;
+
+        rv = ct.prefixFind("foo"); // exact match
+        CPPUNIT_ASSERT(rv != ct.end());
+
+        rv = ct.prefixFind("fooo"); //prefix match
+        CPPUNIT_ASSERT(rv != ct.end());
+
+        rv = ct.prefixFind("go"); //prefix match, not found
+        CPPUNIT_ASSERT(rv == ct.end());
+    }
 }
 
 

@@ -24,18 +24,20 @@ public:
     // return a pointer to the node keyed on key, if found, or nullptr
     // if no exact key matches
     CompactArrayTrieNode *recursiveFind (Key const & k) {
-        return recursiveLowFind(k, 0, false);
+        return recursiveLowFind(k, 0, false, false, 0);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // or nullptr if no prefix is found
     CompactArrayTrieNode *recursivePrefixFind (Key const & k) {
-        return recursiveLowFind(k, 0, true);
+        return recursiveLowFind(k, 0, true, false, 0);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // ending with the supplied suffix char or nullptr if none is found
-    CompactArrayTrieNode *recursivePrefixFind (Key const &, int suffixChar);
+    CompactArrayTrieNode *recursivePrefixFind (Key const & k, int suffixChar) {
+        return recursiveLowFind(k, 0, true, true, suffixChar);
+    }
 
     // add a new value_type made of Key and Value in the position pointed
     // to by Key. This method is meant to be called on the root node of the
@@ -49,7 +51,8 @@ public:
 private:
     // return a pointer to the stored value of the longest-matching-prefix
     // (if prefix==true) or exact match; return NULL if nothing is found.
-    CompactArrayTrieNode *recursiveLowFind (Key const &, size_t pos, bool const prefix);
+    // if havetrailchar is true, then the looked-for prefix MUST end with trailchar
+    CompactArrayTrieNode *recursiveLowFind (Key const &, size_t pos, bool const prefix, bool haveTrailChar, int trailchar);
 
     typedef std::vector<CompactArrayTrieNode *> children_type;
 
@@ -80,23 +83,29 @@ CompactArrayTrieNode<key_type,mapped_type>::~CompactArrayTrieNode()
 
 template <class key_type, class mapped_type>
 CompactArrayTrieNode<key_type,mapped_type> *
-CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & key, size_t pos, bool const prefix)
+CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & key, size_t pos, bool const prefix, bool haveTrailChar, int trailchar)
 {
     if (pos < key.size()) {
         // todo: charTransform?
         int character = key[pos];
+
+        if (!haveTrailChar || character == trailchar) {
+            if (prefix && haveData)
+                return this;
+        }
+
         const CompactArrayTrieNode *child = find(character);
         CompactArrayTrieNode *result = nullptr;
         if (child)
-             result = find(character)->recursiveLowFind(key, pos+1, prefix);
-        if (result)
+             result = find(character)->recursiveLowFind(key, pos+1, prefix, haveTrailChar, trailchar);
+        if (result) {
             return result;
-        if (prefix && haveData)
-            return this;
+        }
         return nullptr;
     } else {
-        if (haveData)
+        if (haveData) {
             return this;
+        }
         return nullptr;
     }
 }
