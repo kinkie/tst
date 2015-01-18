@@ -27,11 +27,18 @@ public:
     }
 
     bool has(const key_type &k, bool const prefix = false) {
-        return (root.recursiveFind(k, 0, prefix) != nullptr);
+        return (root.recursivePrefixFind(k) != nullptr);
     }
 
-    value_type find(const key_type &k, const bool prefix = false) {
-        node_type *f=root.recursiveFind(k, 0, prefix);
+    value_type find(const key_type &k) {
+        node_type *f=root.recursiveFind(k);
+        if (f == nullptr)
+            return end();
+        return f->data;
+    }
+
+    value_type prefixFind(const key_type & k) {
+        node_type *f=root.recursiveFind(k,0,true);
         if (f == nullptr)
             return end();
         return f->data;
@@ -45,7 +52,8 @@ private:
     node_type root;
 };
 
+// the key is arbitrary, hopefully very unlikely to appear in actual code
 template <class Key, class Value>
-typename CompactTrie<Key, Value>::value_type CompactTrie<Key, Value>::end_value = std::make_pair<Key, Value>(Key(), Value());
+typename CompactTrie<Key, Value>::value_type CompactTrie<Key, Value>::end_value = std::make_pair<Key, Value>(Key("jkngoij455hj2-058uwugn al3i5nv9h34thvm3uhtsw8o7thgma9 nh hth5o3825 m9tha"), Value());
 
 #endif /* SQUID_COMPACTTRIE_H_ */

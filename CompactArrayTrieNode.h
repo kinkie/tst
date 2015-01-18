@@ -21,9 +21,21 @@ public:
     // if not found
     CompactArrayTrieNode *find (int character);
 
-    // return a pointer to the stored value of the longest-matching-prefix
-    // (if prefix==true) or exact match; return NULL if nothing is found.
-    CompactArrayTrieNode *recursiveFind (Key const &, size_t pos = 0, bool const prefix = false);
+    // return a pointer to the node keyed on key, if found, or nullptr
+    // if no exact key matches
+    CompactArrayTrieNode *recursiveFind (Key const & k) {
+        return recursiveLowFind(k, 0, false);
+    }
+
+    // return a pointer to the node keyed on the SHORTEST prefix of key
+    // or nullptr if no prefix is found
+    CompactArrayTrieNode *recursivePrefixFind (Key const & k) {
+        return recursiveLowFind(k, 0, true);
+    }
+
+    // return a pointer to the node keyed on the SHORTEST prefix of key
+    // ending with the supplied suffix char or nullptr if none is found
+    CompactArrayTrieNode *recursivePrefixFind (Key const &, int suffixChar);
 
     // add a new value_type made of Key and Value in the position pointed
     // to by Key. This method is meant to be called on the root node of the
@@ -35,6 +47,10 @@ public:
     friend class CompactTrie<key_type, mapped_type>;
 
 private:
+    // return a pointer to the stored value of the longest-matching-prefix
+    // (if prefix==true) or exact match; return NULL if nothing is found.
+    CompactArrayTrieNode *recursiveLowFind (Key const &, size_t pos, bool const prefix);
+
     typedef std::vector<CompactArrayTrieNode *> children_type;
 
     children_type children;
@@ -64,7 +80,7 @@ CompactArrayTrieNode<key_type,mapped_type>::~CompactArrayTrieNode()
 
 template <class key_type, class mapped_type>
 CompactArrayTrieNode<key_type,mapped_type> *
-CompactArrayTrieNode<key_type,mapped_type>::recursiveFind (key_type const & key, size_t pos, bool const prefix)
+CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & key, size_t pos, bool const prefix)
 {
     if (pos < key.size()) {
         // todo: charTransform?
@@ -72,7 +88,7 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveFind (key_type const & key,
         const CompactArrayTrieNode *child = find(character);
         CompactArrayTrieNode *result = nullptr;
         if (child)
-             result = find(character)->recursiveFind(key, pos+1, prefix);
+             result = find(character)->recursiveLowFind(key, pos+1, prefix);
         if (result)
             return result;
         if (prefix && haveData)

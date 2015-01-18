@@ -31,7 +31,10 @@ TestCompactTrie::testFind()
     CPPUNIT_ASSERT(rv != ct.end());
     CPPUNIT_ASSERT_EQUAL(rv.second,1);
     CPPUNIT_ASSERT(ct.find("gazonk") == ct.end());
-    // todo: check that ct.end() is really unique
+
+    CT::value_type test_end = std::make_pair(std::string(), int());
+    CPPUNIT_ASSERT(ct.find("gazonk") != test_end);
+
 }
 
 
