@@ -44,6 +44,13 @@ public:
         return f->data;
     }
 
+    value_type prefixFind(const key_type & k, int suffixChar) {
+        node_type *f=root.recursivePrefixFind(k, suffixChar);
+        if (f == nullptr)
+            return end();
+        return f->data;
+    }
+
     const value_type & end() {
         return end_value;
     }

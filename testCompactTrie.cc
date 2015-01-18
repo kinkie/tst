@@ -16,6 +16,7 @@ TestCompactTrie::testInsert()
     CT ct;
     ct.insert("foo",1);
     ct.insert("bar",2);
+    ct.insert("baz",3);
     CPPUNIT_ASSERT(ct.has("foo"));
     CPPUNIT_ASSERT(ct.has("bar"));
     CPPUNIT_ASSERT(!ct.has("gazonk"));
@@ -28,6 +29,7 @@ TestCompactTrie::testFind()
     ct.insert("foo",1);
     ct.insert("bar",2);
     ct.insert("foo.",3);
+    ct.insert("baz.", 4);
     {
         CT::value_type rv = ct.find("foo");
         CPPUNIT_ASSERT(rv != ct.end()); // found
@@ -53,6 +55,32 @@ TestCompactTrie::testFind()
 
         rv = ct.prefixFind("go"); //prefix match, not found
         CPPUNIT_ASSERT(rv == ct.end());
+    }
+
+    {
+        CT::value_type rv;
+
+        rv = ct.prefixFind("foo.", '.'); // exact match
+        CPPUNIT_ASSERT( rv != ct.end());
+
+        rv = ct.prefixFind("foo", '.'); // exact match, termination is irrelevant
+        CPPUNIT_ASSERT( rv != ct.end());
+
+        rv = ct.prefixFind("foooo", '.'); // prefix match but no terminator
+        CPPUNIT_ASSERT( rv == ct.end());
+
+        rv = ct.prefixFind("foo.bar", '.'); // prefix match and terminator
+        CPPUNIT_ASSERT( rv != ct.end());
+
+        rv = ct.prefixFind("baz", '.');
+        CPPUNIT_ASSERT( rv != ct.end());
+
+        rv = ct.prefixFind("baz.www", '.');
+        CPPUNIT_ASSERT( rv != ct.end());
+
+        rv = ct.prefixFind("bazz.www", '.');
+        CPPUNIT_ASSERT( rv == ct.end());
+
     }
 }
 

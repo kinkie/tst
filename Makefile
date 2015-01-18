@@ -1,7 +1,7 @@
 CXX=/usr/bin/g++
 INCLUDES=-I/opt/local/include
 CFLAGS = -g $(INCLUDES)
-CXXFLAGS = -g -std=c++11 $(INCLUDES)
+CXXFLAGS = -O0 -g -std=c++11 $(INCLUDES)
 LDFLAGS=-L/opt/local/lib
 TESTS = TestCompactArrayTrieNode testCompactTrie
 #LIBS = libTernaryTrie.a

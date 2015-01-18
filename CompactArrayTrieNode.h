@@ -51,7 +51,8 @@ public:
 private:
     // return a pointer to the stored value of the longest-matching-prefix
     // (if prefix==true) or exact match; return NULL if nothing is found.
-    // if havetrailchar is true, then the looked-for prefix MUST end with trailchar
+    // if havetrailchar is true, then a prefix is matched only if it ends
+    // wuth the specified trailchar, otherwise it is ignored.
     CompactArrayTrieNode *recursiveLowFind (Key const &, size_t pos, bool const prefix, bool haveTrailChar, int trailchar);
 
     typedef std::vector<CompactArrayTrieNode *> children_type;
@@ -89,9 +90,12 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & k
         // todo: charTransform?
         int character = key[pos];
 
-        if (!haveTrailChar || character == trailchar) {
-            if (prefix && haveData)
-                return this;
+        if (prefix && !haveTrailChar && haveData)
+            return this;
+        if (haveTrailChar && character == trailchar) {
+            CompactArrayTrieNode *child = find(character);
+            if (child->haveData)
+                return child;
         }
 
         const CompactArrayTrieNode *child = find(character);
@@ -105,6 +109,14 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & k
     } else {
         if (haveData) {
             return this;
+        }
+        // special case: if prefix and haveTrailChar, we look up one more level
+        // for the trail char
+        CompactArrayTrieNode *child;
+        if (prefix && haveTrailChar) {
+            child = find(trailchar);
+            if (child != nullptr && child->haveData)
+                return child;
         }
         return nullptr;
     }
