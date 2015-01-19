@@ -66,6 +66,9 @@ TestCompactTrie::testFind()
         rv = ct.prefixFind("foo.bar", '.'); // prefix match and terminator
         CPPUNIT_ASSERT( rv != ct.end());
 
+        rv = ct.prefixFind("baz.bar", '.'); // prefix match and terminator
+        CPPUNIT_ASSERT( rv != ct.end());
+
         rv = ct.prefixFind("baz", '.');
         CPPUNIT_ASSERT( rv != ct.end());
 

@@ -93,18 +93,22 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & k
         // todo: charTransform?
         int character = key[pos];
 
+        // If we are doing prefix matching and have data and
+        // don't care about the trailing character
+        // note: the order of the conditions is weird in order to be branch-predictor-friendly
         if (prefix && !haveTrailChar && haveData)
             return this;
+
+        CompactArrayTrieNode *child = find(character);
+
         if (haveTrailChar && character == trailchar) {
-            CompactArrayTrieNode *child = find(character);
-            if (child->haveData)
+            if (child && child->haveData)
                 return child;
         }
 
-        const CompactArrayTrieNode *child = find(character);
         CompactArrayTrieNode *result = nullptr;
         if (child)
-            result = find(character)->recursiveLowFind(key, pos+1, prefix, haveTrailChar, trailchar);
+            result = child->recursiveLowFind(key, pos+1, prefix, haveTrailChar, trailchar);
         if (result) {
             return result;
         }
@@ -118,7 +122,7 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & k
         CompactArrayTrieNode *child;
         if (prefix && haveTrailChar) {
             child = find(trailchar);
-            if (child != nullptr && child->haveData)
+            if (child && child->haveData)
                 return child;
         }
         return nullptr;
