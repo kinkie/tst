@@ -31,21 +31,15 @@ TestCompactTrie::testFind()
     ct.insert("foo.",3);
     ct.insert("baz.", 4);
     {
-        CT::value_type rv = ct.find("foo");
+        CT::iterator rv = ct.find("foo");
         CPPUNIT_ASSERT(rv != ct.end()); // found
-        CPPUNIT_ASSERT_EQUAL(rv.second,1); // mapped data match
+        CPPUNIT_ASSERT_EQUAL(rv->second,1); // mapped data match
         CPPUNIT_ASSERT(ct.find("gazonk") == ct.end()); // not found
     }
 
     {
-        // check CompactTrie::end() uniqueness
-        CT::value_type test_end = std::make_pair(std::string(), int());
-        CPPUNIT_ASSERT(ct.find("gazonk") != test_end);
-    }
-
-    {
         // prefix find tests
-        CT::value_type rv;
+        CT::iterator rv;
 
         rv = ct.prefixFind("foo"); // exact match
         CPPUNIT_ASSERT(rv != ct.end());
@@ -58,7 +52,7 @@ TestCompactTrie::testFind()
     }
 
     {
-        CT::value_type rv;
+        CT::iterator rv;
 
         rv = ct.prefixFind("foo.", '.'); // exact match
         CPPUNIT_ASSERT( rv != ct.end());
@@ -81,6 +75,37 @@ TestCompactTrie::testFind()
         rv = ct.prefixFind("bazz.www", '.');
         CPPUNIT_ASSERT( rv == ct.end());
 
+    }
+}
+
+void
+TestCompactTrie::testIterator()
+{
+    CT ct;
+
+    ct.insert("foo",1);
+    ct.insert("bar",2);
+    ct.insert("gazonk",3);
+
+    {
+        CT::iterator i1=ct.find("foo");
+        CT::iterator i2=ct.find("foo");
+        CPPUNIT_ASSERT(i1 == i2);
+
+        i2=ct.find("bar");
+        CPPUNIT_ASSERT(i1 != i2);
+
+        i2=ct.find("not found");
+        CPPUNIT_ASSERT(i1 != i2);
+    }
+
+    {
+        // note: this behavior DIFFERS from std:: iterators.
+        // the end() iterator is SHARED between all class intances
+        CT ct2;
+        CT::iterator e1=ct.find("not found");
+        CT::iterator e2=ct2.find("not found");
+        CPPUNIT_ASSERT(e1 == e2);
     }
 }
 

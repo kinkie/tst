@@ -3,6 +3,11 @@
 
 #include "CompactArrayTrieNode.h"
 
+#include <cassert>
+
+template <class Key, class Value>
+class CompactTrieIterator;
+
 /**
  *
  */
@@ -12,7 +17,7 @@ public:
     typedef Key key_type;
     typedef Value mapped_type;
     typedef std::pair<key_type, mapped_type> value_type;
-    static value_type end_value;
+    typedef CompactTrieIterator<key_type, mapped_type> iterator;
 
 private:
     typedef CompactArrayTrieNode<key_type, mapped_type> node_type;
@@ -30,37 +35,55 @@ public:
         return (root.recursivePrefixFind(k) != nullptr);
     }
 
-    value_type find(const key_type &k) {
+    iterator find(const key_type &k) {
         node_type *f=root.recursiveFind(k);
         if (f == nullptr)
             return end();
-        return f->data;
+        return iterator(f);
     }
 
-    value_type prefixFind(const key_type & k) {
+    iterator prefixFind(const key_type & k) {
         node_type *f=root.recursivePrefixFind(k);
         if (f == nullptr)
             return end();
-        return f->data;
+        return iterator(f);
     }
 
-    value_type prefixFind(const key_type & k, int suffixChar) {
+    iterator prefixFind(const key_type & k, int suffixChar) {
         node_type *f=root.recursivePrefixFind(k, suffixChar);
         if (f == nullptr)
             return end();
-        return f->data;
+        return iterator(f);
     }
 
-    const value_type & end() {
-        return end_value;
+    iterator end()
+    {
+        static CompactArrayTrieNode<Key,Value> endnode;
+        static typename CompactTrie<Key, Value>::iterator enditer(&endnode);
+        return enditer;
     }
 
 private:
     node_type root;
 };
 
-// the key is arbitrary, hopefully very unlikely to appear in actual code
 template <class Key, class Value>
-typename CompactTrie<Key, Value>::value_type CompactTrie<Key, Value>::end_value = std::make_pair<Key, Value>(Key("jkngoij455hj2-058uwugn al3i5nv9h34thvm3uhtsw8o7thgma9 nh hth5o3825 m9tha"), Value());
+class CompactTrieIterator
+{
+public:
+    typedef typename CompactTrie<Key,Value>::value_type value_type;
+    CompactTrieIterator() : node(nullptr) {} // will bomb on dereferencing
+    CompactTrieIterator(const CompactTrieIterator& c) : node(c.node) {}
+    CompactTrieIterator& operator=(const CompactTrieIterator &c) { node = c.node; return *this;}
+    bool operator==(const CompactTrieIterator& c) const { return node == c.node; }
+    bool operator!=(const CompactTrieIterator& c) const { return node != c.node; }
+    value_type & operator*() const { assert(node && node->haveData); return node->data; }
+    value_type * operator->() const { assert(node && node->haveData); return &(node->data); }
+private:
+    friend class CompactTrie<Key, Value>;
+    explicit CompactTrieIterator(CompactArrayTrieNode <Key,Value> *n) : node(n) {}
+    CompactTrieIterator& operator++();
+    CompactArrayTrieNode<Key,Value> *node;
+};
 
 #endif /* SQUID_COMPACTTRIE_H_ */

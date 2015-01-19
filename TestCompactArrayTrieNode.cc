@@ -30,11 +30,6 @@ TestCompactArrayTrieNode::findInNode()
     CPPUNIT_ASSERT(tn.recursiveFind("gazonk") == nullptr);
 }
 
-void
-TestCompactArrayTrieNode::nodeIterator()
-{
-}
-
 /*** boilerplate starts here ***/
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestCompactArrayTrieNode );

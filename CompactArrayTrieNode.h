@@ -5,6 +5,8 @@
 
 template <class Key, class Value>
 class CompactTrie;
+template <class Key, class Value>
+class CompactTrieIterator;
 
 template <class Key, class Value>
 class CompactArrayTrieNode
@@ -47,6 +49,7 @@ public:
     bool recursiveAdd (key_type const &, mapped_type);
 
     friend class CompactTrie<key_type, mapped_type>;
+    friend class CompactTrieIterator<key_type, mapped_type>;
 
 private:
     // return a pointer to the stored value of the longest-matching-prefix
@@ -71,7 +74,7 @@ private:
 
 template <class key_type, class mapped_type>
 CompactArrayTrieNode<key_type,mapped_type>::CompactArrayTrieNode() :
-    offset(0), haveData(false)
+offset(0), haveData(false)
 {}
 
 template <class key_type, class mapped_type>
@@ -101,7 +104,7 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & k
         const CompactArrayTrieNode *child = find(character);
         CompactArrayTrieNode *result = nullptr;
         if (child)
-             result = find(character)->recursiveLowFind(key, pos+1, prefix, haveTrailChar, trailchar);
+            result = find(character)->recursiveLowFind(key, pos+1, prefix, haveTrailChar, trailchar);
         if (result) {
             return result;
         }
