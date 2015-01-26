@@ -28,8 +28,8 @@ TestCompactTrie::testFind()
     CT ct;
     ct.insert("foo",1);
     ct.insert("bar",2);
-    ct.insert("foo.",3);
-    ct.insert("baz.", 4);
+    ct.insert("foo.",3); //terminator WITH nonterminated variant
+    ct.insert("baz.", 4);  //terminator, no nonterminated variant
     {
         CT::iterator rv = ct.find("foo");
         CPPUNIT_ASSERT(rv != ct.end()); // found

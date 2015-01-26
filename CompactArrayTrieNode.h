@@ -101,6 +101,7 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind (key_type const & k
 
         CompactArrayTrieNode *child = find(character);
 
+        // if we have a trail char, the data might be in the node with the (optional) trail char child
         if (haveTrailChar && character == trailchar) {
             if (child && child->haveData)
                 return child;
