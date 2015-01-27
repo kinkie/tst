@@ -130,6 +130,7 @@ TestCompactTrie::testContents()
     CPPUNIT_ASSERT(!ct.contents().empty());
     ct.insert("foo1",1);
     ct.insert("foo0",1);
+    CPPUNIT_ASSERT(ct.contents().size() == 3);
     CPPUNIT_ASSERT(ct.contents()[0]->first == "foo");
     CPPUNIT_ASSERT(ct.contents()[1]->first == "foo0");
     CPPUNIT_ASSERT(ct.contents()[2]->first == "foo1");
