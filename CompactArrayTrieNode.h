@@ -41,12 +41,25 @@ public:
         return recursiveLowFind(k, 0, true, true, suffixChar);
     }
 
+    // true if the subtree (including the current node) is empty
+    bool empty() const {
+        if (!haveData && children.empty())
+            return true;
+        for (auto i = children.begin(); i != children.end(); ++i)
+            if (*i && !(*i)->empty())
+                return false;
+        return haveData;
+    }
+
     // add a new value_type made of Key and Value in the position pointed
     // to by Key. This method is meant to be called on the root node of the
     // Trie; will recurse on the internal variant by the same name.
     // returns false if the string can't be added.
     // will overwrite previously-set data with the same key
     bool recursiveAdd(key_type const &, mapped_type);
+
+    // walk the subtree and fill the passed std::vector with pointers to nodes having data
+    void recursivePreorderWalk(std::vector<CompactArrayTrieNode *> &) ;
 
     friend class CompactTrie<key_type, mapped_type>;
     friend class CompactTrieIterator<key_type, mapped_type>;
@@ -178,6 +191,18 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveAdd(key_type const &k , map
     if (!children[actual_slot])
         children[actual_slot] = new CompactArrayTrieNode;
     return children[actual_slot]->recursiveAdd(k,v,pos+1);
+}
+
+template <class key_type, class mapped_type>
+void
+CompactArrayTrieNode<key_type,mapped_type>::recursivePreorderWalk(std::vector<CompactArrayTrieNode *> &v)
+{
+    if (haveData)
+        v.push_back(this);
+    for (auto c = children.begin(); c != children.end(); ++c) {
+        if (*c)
+            (*c)->recursivePreorderWalk(v);
+    }
 }
 
 #endif /* SQUID_COMPACTARRAYTRIENODE_H_ */

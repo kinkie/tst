@@ -4,6 +4,7 @@
 #include "CompactArrayTrieNode.h"
 
 #include <cassert>
+#include <algorithm>
 
 template <class Key, class Value>
 class CompactTrieIterator;
@@ -28,6 +29,7 @@ public:
 
     // add a new item. Return false if item can't be added
     bool insert(const key_type &k, mapped_type v) {
+        contentsCache.clear();
         return root.recursiveAdd(k,v);
     }
 
@@ -63,9 +65,38 @@ public:
         return enditer;
     }
 
+    bool empty() const {
+        return root.empty();
+    }
+
+    /// return a vector of iterators to all valid contents in the trie
+    const std::vector<iterator> & contents();
+
+    //TODO: add delete
+
 private:
     node_type root;
+    std::vector<iterator> contentsCache; // valid if !empty() || root.empty()
 };
+
+template <class Key, class Value>
+const std::vector<typename CompactTrie<Key,Value>::iterator> &
+CompactTrie<Key,Value>::contents()
+{
+    // we have valid cached contents
+    if (!contentsCache.empty() || root.empty())
+        return contentsCache;
+
+    // possible optimization: keep a count of inserted/removed entries
+    // and preallocate the vector size correctly
+    std::vector<node_type *> v;
+    root.recursivePreorderWalk(v);
+    contentsCache.clear();
+    contentsCache.reserve(v.size());
+    for (auto i = v.begin(); i != v.end(); ++i)
+        contentsCache.push_back(iterator(*i));
+    return contentsCache;
+}
 
 template <class Key, class Value>
 class CompactTrieIterator
