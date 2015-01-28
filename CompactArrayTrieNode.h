@@ -42,13 +42,12 @@ public:
     }
 
     // true if the subtree (including the current node) is empty
+    // NOTE: this implementation is only correct if it's not possible
+    // to remove children from the TrieNode. Once that API is implemented,
+    // in order for empty() to be correct, it'll have to also clear the
+    // children array once the last child is removed.
     bool empty() const {
-        if (!haveData && children.empty())
-            return true;
-        for (auto i = children.begin(); i != children.end(); ++i)
-            if (*i && !(*i)->empty())
-                return false;
-        return haveData;
+        return (!haveData && children.empty());
     }
 
     // add a new value_type made of Key and Value in the position pointed
