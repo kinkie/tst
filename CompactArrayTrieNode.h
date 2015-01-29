@@ -81,7 +81,8 @@ private:
     CompactArrayTrieNode(const CompactArrayTrieNode&);
     CompactArrayTrieNode& operator =(CompactArrayTrieNode const &);
 
-    bool recursiveAdd(key_type const &, mapped_type &, size_t pos);
+    bool recursiveAdd(key_type const &, const mapped_type &, size_t pos);
+    static bool iterativeAdd(const key_type &, const mapped_type &, CompactArrayTrieNode *);
 };
 
 template <class key_type, class mapped_type>
@@ -163,12 +164,13 @@ template <class key_type, class mapped_type>
 bool
 CompactArrayTrieNode<key_type,mapped_type>::recursiveAdd(key_type const &k , mapped_type v)
 {
-    return recursiveAdd(k,v,0);
+    //return recursiveAdd(k,v,0);
+    return iterativeAdd(k, v, this);
 }
 
 template <class key_type, class mapped_type>
 bool
-CompactArrayTrieNode<key_type,mapped_type>::recursiveAdd(key_type const &k , mapped_type &v, size_t pos)
+CompactArrayTrieNode<key_type,mapped_type>::recursiveAdd(const key_type &k, const mapped_type &v, size_t pos)
 {
     // terminal node in the string. Add data here.
     if (pos == k.size()) {
@@ -190,6 +192,34 @@ CompactArrayTrieNode<key_type,mapped_type>::recursiveAdd(key_type const &k , map
     if (!children[actual_slot])
         children[actual_slot] = new CompactArrayTrieNode;
     return children[actual_slot]->recursiveAdd(k,v,pos+1);
+}
+
+template <class key_type, class mapped_type>
+bool
+CompactArrayTrieNode<key_type,mapped_type>::iterativeAdd(const key_type &k, const mapped_type &v, CompactArrayTrieNode *n)
+{
+    auto e = k.end();
+    auto i=k.begin();
+    while (i != e) {
+        const size_t slot = *i;
+        if (n->children.empty()) { // empty children. Make room for exactly one
+            n->children.resize(1, nullptr);
+            n->offset = slot;
+        } else if (slot < n->offset) { //underflow. Insert and shift at head
+            n->children.insert(n->children.begin(), n->offset - slot, nullptr);
+            n->offset = slot;
+        } else if (slot >= n->offset + n->children.size()) { //overflow. extend children
+            n->children.resize(slot - n->offset + 1, nullptr);
+        }
+        const size_t actual_slot = slot - n->offset;
+        if (!n->children[actual_slot])
+            n->children[actual_slot] = new CompactArrayTrieNode;
+        n = n->children[actual_slot];
+        ++i;
+    }
+    n->haveData = true;
+    n->data = std::make_pair(k,v);
+    return true;
 }
 
 template <class key_type, class mapped_type>
