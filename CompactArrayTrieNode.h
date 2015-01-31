@@ -21,27 +21,24 @@ public:
 
     // return a pointer to the node corresponding to the char, or nullptr
     // if not found
-    CompactArrayTrieNode *find(int character);
+    CompactArrayTrieNode *findInNode(int character);
 
     // return a pointer to the node keyed on key, if found, or nullptr
     // if no exact key matches
-    CompactArrayTrieNode *recursiveFind(Key const & k) {
+    CompactArrayTrieNode *find(Key const & k) {
         return iterativeLowFind(k, false, false, 0, this);
-        //return recursiveLowFind(k, 0, false, false, 0);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // or nullptr if no prefix is found
-    CompactArrayTrieNode *recursivePrefixFind(Key const & k) {
+    CompactArrayTrieNode *findPrefix(Key const & k) {
         return iterativeLowFind(k, true, false, 0, this);
-        //return recursiveLowFind(k, 0, true, false, 0);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // ending with the supplied suffix char or nullptr if none is found
-    CompactArrayTrieNode *recursivePrefixFind(Key const & k, int const suffixChar) {
+    CompactArrayTrieNode *findPrefix(Key const & k, int const suffixChar) {
         return iterativeLowFind(k, true, true, suffixChar, this);
-        //return recursiveLowFind(k, 0, true, true, suffixChar);
     }
 
     // true if the subtree (including the current node) is empty
@@ -58,7 +55,7 @@ public:
     // Trie; will recurse on the internal variant by the same name.
     // returns false if the string can't be added.
     // will overwrite previously-set data with the same key
-    bool recursiveAdd(key_type const &, mapped_type);
+    bool insert(key_type const &, mapped_type);
 
     // walk the subtree and fill the passed std::vector with pointers to nodes having data
     void recursivePreorderWalk(std::vector<CompactArrayTrieNode *> &) ;
@@ -71,7 +68,6 @@ private:
     // (if prefix==true) or exact match; return NULL if nothing is found.
     // if havetrailchar is true, then a prefix is matched only if it ends
     // wuth the specified trailchar, otherwise it is ignored.
-    CompactArrayTrieNode *recursiveLowFind(Key const &, size_t pos, bool const prefix, bool const haveTrailChar, int const trailchar);
     static CompactArrayTrieNode *iterativeLowFind(Key const &, bool const prefix, bool const haveTrailChar, int const trailchar, CompactArrayTrieNode *n);
 
     typedef std::vector<CompactArrayTrieNode *> children_type;
@@ -85,7 +81,6 @@ private:
     CompactArrayTrieNode(const CompactArrayTrieNode&);
     CompactArrayTrieNode& operator =(CompactArrayTrieNode const &);
 
-    bool recursiveAdd(key_type const &, const mapped_type &, size_t pos);
     static bool iterativeAdd(const key_type &, const mapped_type &, CompactArrayTrieNode *);
 };
 
@@ -119,7 +114,7 @@ CompactArrayTrieNode<key_type,mapped_type>::iterativeLowFind(key_type const & ke
             return n;
 
         // does key character have any data associated to search in?
-        CompactArrayTrieNode *child = n->find(character);
+        CompactArrayTrieNode *child = n->findInNode(character);
 
         // if the key is "moc.elpmaxe.www" and tree contains "moc.elpmaxe." we want a match.
         // "moc.elpmaxe." is a tree entry when child('.')->haveData == true
@@ -144,7 +139,7 @@ CompactArrayTrieNode<key_type,mapped_type>::iterativeLowFind(key_type const & ke
     // if the key is "moc.elpmaxe" and tree contains "moc.elpmaxe." we want a match.
     // - "moc.elpmaxe." is a tree entry only if child('.')->haveData == true
     if (prefix && haveTrailChar) {
-        const auto child = n->find(trailchar);
+        const auto child = n->findInNode(trailchar);
         if (child && child->haveData)
             return child;
         return nullptr;
@@ -155,56 +150,7 @@ CompactArrayTrieNode<key_type,mapped_type>::iterativeLowFind(key_type const & ke
 
 template <class key_type, class mapped_type>
 CompactArrayTrieNode<key_type,mapped_type> *
-CompactArrayTrieNode<key_type,mapped_type>::recursiveLowFind(key_type const & key, size_t pos, bool const prefix, const bool haveTrailChar, const int trailchar)
-{
-    if (pos < key.size()) {
-
-        // not yet at the end of the key string, grab the next character
-        const int character = key[pos];
-
-        // the tree entry ending here is prefix of key, no need to search further
-        if (prefix && !haveTrailChar && haveData)
-            return this;
-
-        // does key character have any data associated to search in?
-        CompactArrayTrieNode *child = find(character);
-
-        // if the key is "moc.elpmaxe.www" and tree contains "moc.elpmaxe." we want a match.
-        // "moc.elpmaxe." is a tree entry when child('.')->haveData == true
-        //
-        // NP: check for this here instead of on recurse because the child node
-        //     does not 'know' what character we used to reach it.
-        if (prefix && haveTrailChar && character == trailchar && child && child->haveData)
-            return child;
-
-        CompactArrayTrieNode *result = nullptr;
-
-        // recurse if there is a child sub-tree
-        if (child)
-            result = child->recursiveLowFind(key, pos+1, prefix, haveTrailChar, trailchar);
-
-        return result; // may be nullptr
-
-    } else {
-        // reached end of the key string, when a tree entry also ends here no need to continue.
-        if (haveData)
-            return this;
-
-        // if the key is "moc.elpmaxe" and tree contains "moc.elpmaxe." we want a match.
-        // - "moc.elpmaxe." is a tree entry only if child('.')->haveData == true
-        CompactArrayTrieNode *child = nullptr;
-        if (prefix && haveTrailChar) {
-            child = find(trailchar);
-            if (child && !child->haveData)
-                return nullptr;
-        }
-        return child; // may be nullptr
-    }
-}
-
-template <class key_type, class mapped_type>
-CompactArrayTrieNode<key_type,mapped_type> *
-CompactArrayTrieNode<key_type,mapped_type>::find(int character)
+CompactArrayTrieNode<key_type,mapped_type>::findInNode(int character)
 {
     const int realPos = character - offset;
     if (character >= offset && realPos < children.size()) {
@@ -216,36 +162,9 @@ CompactArrayTrieNode<key_type,mapped_type>::find(int character)
 
 template <class key_type, class mapped_type>
 bool
-CompactArrayTrieNode<key_type,mapped_type>::recursiveAdd(key_type const &k , mapped_type v)
+CompactArrayTrieNode<key_type,mapped_type>::insert(key_type const &k , mapped_type v)
 {
-    //return recursiveAdd(k,v,0);
     return iterativeAdd(k, v, this);
-}
-
-template <class key_type, class mapped_type>
-bool
-CompactArrayTrieNode<key_type,mapped_type>::recursiveAdd(const key_type &k, const mapped_type &v, size_t pos)
-{
-    // terminal node in the string. Add data here.
-    if (pos == k.size()) {
-        haveData = true;
-        data = std::make_pair(k,v);
-        return true;
-    }
-    const size_t slot = k[pos];
-    if (children.empty()) { // empty children. Make room for exactly one
-        children.resize(1, nullptr);
-        offset = slot;
-    } else if (slot < offset) { //underflow. Insert and shift at head
-        children.insert(children.begin(), offset - slot, nullptr);
-        offset = slot;
-    } else if (slot >= offset + children.size()) { //overflow. extend children
-        children.resize(slot - offset + 1, nullptr);
-    }
-    const size_t actual_slot = slot - offset;
-    if (!children[actual_slot])
-        children[actual_slot] = new CompactArrayTrieNode;
-    return children[actual_slot]->recursiveAdd(k,v,pos+1);
 }
 
 template <class key_type, class mapped_type>

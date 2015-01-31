@@ -30,29 +30,29 @@ public:
     // add a new item. Return false if item can't be added
     bool insert(const key_type &k, mapped_type v) {
         contentsCache.clear();
-        return root.recursiveAdd(k,v);
+        return root.insert(k,v);
     }
 
     bool has(const key_type &k, bool const prefix = false) {
-        return (root.recursivePrefixFind(k) != nullptr);
+        return (root.findPrefix(k) != nullptr);
     }
 
     iterator find(const key_type &k) {
-        node_type *f=root.recursiveFind(k);
+        node_type *f=root.find(k);
         if (f == nullptr)
             return end();
         return iterator(f);
     }
 
     iterator prefixFind(const key_type & k) {
-        node_type *f=root.recursivePrefixFind(k);
+        node_type *f=root.findPrefix(k);
         if (f == nullptr)
             return end();
         return iterator(f);
     }
 
     iterator prefixFind(const key_type & k, int suffixChar) {
-        node_type *f=root.recursivePrefixFind(k, suffixChar);
+        node_type *f=root.findPrefix(k, suffixChar);
         if (f == nullptr)
             return end();
         return iterator(f);

@@ -13,21 +13,21 @@ void
 TestCompactArrayTrieNode::addToNode()
 {
     CompactArrayTrieNode<std::string,int> tn;
-    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("foo",1));
-    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("bar",2));
+    CPPUNIT_ASSERT_EQUAL(true, tn.insert("foo",1));
+    CPPUNIT_ASSERT_EQUAL(true, tn.insert("bar",2));
     int i=3;
-    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("gazonk",i)); // non-const value
-    CPPUNIT_ASSERT_EQUAL(true, tn.recursiveAdd("foo",4)); // overwrite
+    CPPUNIT_ASSERT_EQUAL(true, tn.insert("gazonk",i)); // non-const value
+    CPPUNIT_ASSERT_EQUAL(true, tn.insert("foo",4)); // overwrite
 }
 
 void
 TestCompactArrayTrieNode::findInNode()
 {
     CompactArrayTrieNode<std::string,int> tn;
-    tn.recursiveAdd("foo",1);
-    tn.recursiveAdd("bar",2);
-    CPPUNIT_ASSERT(tn.recursiveFind("foo") != nullptr);
-    CPPUNIT_ASSERT(tn.recursiveFind("gazonk") == nullptr);
+    tn.insert("foo",1);
+    tn.insert("bar",2);
+    CPPUNIT_ASSERT(tn.find("foo") != nullptr);
+    CPPUNIT_ASSERT(tn.find("gazonk") == nullptr);
 }
 
 /*** boilerplate starts here ***/
