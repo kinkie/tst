@@ -55,7 +55,9 @@ public:
     // Trie; will recurse on the internal variant by the same name.
     // returns false if the string can't be added.
     // will overwrite previously-set data with the same key
-    bool insert(key_type const &, mapped_type);
+    bool insert(key_type const &k , const mapped_type &v) {
+        return iterativeAdd(k, v, this);
+    }
 
     // walk the subtree and fill the passed std::vector with pointers to nodes having data
     void recursivePreorderWalk(std::vector<CompactArrayTrieNode *> &) ;
@@ -158,13 +160,6 @@ CompactArrayTrieNode<key_type,mapped_type>::findInNode(int character)
             return children[realPos];
     }
     return nullptr;
-}
-
-template <class key_type, class mapped_type>
-bool
-CompactArrayTrieNode<key_type,mapped_type>::insert(key_type const &k , mapped_type v)
-{
-    return iterativeAdd(k, v, this);
 }
 
 template <class key_type, class mapped_type>
