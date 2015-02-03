@@ -29,20 +29,28 @@ public:
         return find(k.begin(), k.end());
     }
     template <class InputIterator>
-    CompactArrayTrieNode *find(InputIterator begin, const InputIterator&end) {
+    CompactArrayTrieNode *find(InputIterator begin, const InputIterator& end) {
         return iterativeLowFind(begin, end, false, false, 0, this);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // or nullptr if no prefix is found
     CompactArrayTrieNode *findPrefix(Key const & k) {
-        return iterativeLowFind(k.begin(), k.end(), true, false, 0, this);
+        return findPrefix(k.begin(), k.end());
+    }
+    template <class InputIterator>
+    CompactArrayTrieNode *findPrefix(InputIterator begin, const InputIterator& end) {
+        return iterativeLowFind(begin, end, true, false, 0, this);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // ending with the supplied suffix char or nullptr if none is found
     CompactArrayTrieNode *findPrefix(Key const & k, int const suffixChar) {
-        return iterativeLowFind(k.begin(), k.end(), true, true, suffixChar, this);
+        return findPrefix(k.begin(), k.end(), suffixChar);
+    }
+    template <class InputIterator>
+    CompactArrayTrieNode *findPrefix(InputIterator begin, const InputIterator& end, int const suffixChar) {
+        return iterativeLowFind(begin, end, true, true, suffixChar, this);
     }
 
     // true if the subtree (including the current node) is empty
@@ -60,7 +68,7 @@ public:
     // returns false if the string can't be added.
     // will overwrite previously-set data with the same key
     bool insert(key_type const &k , const mapped_type &v) {
-        return iterativeAdd(k, v, this);
+        return iterativeAdd(k.begin(), k.end(), k, v, this);
     }
 
     // walk the subtree and fill the passed std::vector with pointers to nodes having data
@@ -74,7 +82,8 @@ private:
     // (if prefix==true) or exact match; return NULL if nothing is found.
     // if havetrailchar is true, then a prefix is matched only if it ends
     // wuth the specified trailchar, otherwise it is ignored.
-    template <class InputIterator> static CompactArrayTrieNode *iterativeLowFind(InputIterator begin, const InputIterator &end, bool const prefix, bool const haveTrailChar, int const trailchar, CompactArrayTrieNode *n);
+    template <class InputIterator>
+    static CompactArrayTrieNode *iterativeLowFind(InputIterator begin, const InputIterator &end, bool const prefix, bool const haveTrailChar, int const trailchar, CompactArrayTrieNode *n);
 
     typedef std::vector<CompactArrayTrieNode *> children_type;
 
@@ -88,7 +97,8 @@ private:
     CompactArrayTrieNode& operator =(CompactArrayTrieNode const &);
 
     static bool iterativeAdd(const key_type &, const mapped_type &, CompactArrayTrieNode *);
-    template <class InputIterator> static bool iterativeAdd(InputIterator begin, const InputIterator &end, const key_type &, const mapped_type &, CompactArrayTrieNode *);
+    template <class InputIterator>
+    static bool iterativeAdd(InputIterator begin, const InputIterator &end, const key_type &, const mapped_type &, CompactArrayTrieNode *);
 };
 
 template <class key_type, class mapped_type>

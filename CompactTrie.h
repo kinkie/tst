@@ -27,37 +27,75 @@ public:
     CompactTrie() {}
     virtual ~CompactTrie() {}
 
-    // add a new item. Return false if item can't be added
+    /// add a new item. Return false if item can't be added
     bool insert(const key_type &k, mapped_type v) {
         contentsCache.clear();
         return root.insert(k,v);
     }
 
+    /// return true whether the key(prefix is optional second parameter is true)
+    /// is present in the Trie.
     bool has(const key_type &k, bool const prefix = false) {
-        return (root.findPrefix(k) != nullptr);
+        return has(k.begin(), k.end(), prefix);
+    }
+    /// iterator-based variant of has()
+    template <class InputIterator>
+    bool has(InputIterator begin, const InputIterator &end, bool const prefix = false) {
+        if (prefix)
+            return (root.findPrefix(begin, end) != nullptr);
+        return (root.find(begin, end) != nullptr);
     }
 
+    /// return an iterator to value_type (aka std::pair<key,value>)
+    /// corresponding to the supplied key, or end() if not found.
     iterator find(const key_type &k) {
-        node_type *f=root.find(k);
+        return find(k.begin(), k.end());
+    }
+    /// iterator-based variant of find()
+    template <class InputIterator>
+    iterator find(InputIterator begin, const InputIterator& end) {
+        node_type *f=root.find(begin,end);
         if (f == nullptr)
-            return end();
+            return this->end();
         return iterator(f);
     }
 
+    /// return an iterator to value_type (aka std::pair<key,value>)
+    /// corresponding to the SHORTEST PREFIX of the supplied key in the Trie,
+    /// or end() if not found.
     iterator prefixFind(const key_type & k) {
-        node_type *f=root.findPrefix(k);
+        return prefixFind(k.begin(),k.end());
+    }
+    /// iterator-based variant of prefixFind()
+    template <class InputIterator>
+    iterator prefixFind(InputIterator begin, const InputIterator& end) {
+        node_type *f=root.findPrefix(begin,end);
         if (f == nullptr)
-            return end();
+            return this->end();
         return iterator(f);
     }
 
+    /// return an iterator to value_type (aka std::pair<key,value>)
+    /// corresponding to the SHORTEST PREFIX of the supplied key in the Trie,
+    /// where the prefix ends with the supplied suffixChar, OR corresponding
+    /// to the full key if present, OR to the full key plus suffixChar
+    /// e.g. prefixFind("foo%bar%gazonk",'%') will return an iterator to
+    /// any of (if present, in order of preference):
+    /// foo%, foo%bar%, foo%bar%gazonk, foo%bar%gazonk%
     iterator prefixFind(const key_type & k, int suffixChar) {
-        node_type *f=root.findPrefix(k, suffixChar);
+        return prefixFind(k.begin(), k.end(), suffixChar);
+    }
+    /// iterator-based variant of prefixFind(suffixChar)
+    template <class InputIterator>
+    iterator prefixFind(InputIterator begin, const InputIterator& end, int suffixChar) {
+        node_type *f=root.findPrefix(begin, end, suffixChar);
         if (f == nullptr)
-            return end();
+            return this->end();
         return iterator(f);
     }
 
+    /// end-iterator, conforming to STL end(), except that
+    /// TrieA.end() == TrieB.end() for any TrieA, TrieB
     iterator end()
     {
         static CompactArrayTrieNode<Key,Value> endnode;
@@ -65,6 +103,7 @@ public:
         return enditer;
     }
 
+    /// return true if the Trie is empty
     bool empty() const {
         return root.empty();
     }
