@@ -26,19 +26,19 @@ public:
     // return a pointer to the node keyed on key, if found, or nullptr
     // if no exact key matches
     CompactArrayTrieNode *find(Key const & k) {
-        return iterativeLowFind(k, false, false, 0, this);
+        return iterativeLowFind(k.begin(), k.end(), k, false, false, 0, this);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // or nullptr if no prefix is found
     CompactArrayTrieNode *findPrefix(Key const & k) {
-        return iterativeLowFind(k, true, false, 0, this);
+        return iterativeLowFind(k.begin(), k.end(), k, true, false, 0, this);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // ending with the supplied suffix char or nullptr if none is found
     CompactArrayTrieNode *findPrefix(Key const & k, int const suffixChar) {
-        return iterativeLowFind(k, true, true, suffixChar, this);
+        return iterativeLowFind(k.begin(), k.end(), k, true, true, suffixChar, this);
     }
 
     // true if the subtree (including the current node) is empty
@@ -70,7 +70,7 @@ private:
     // (if prefix==true) or exact match; return NULL if nothing is found.
     // if havetrailchar is true, then a prefix is matched only if it ends
     // wuth the specified trailchar, otherwise it is ignored.
-    static CompactArrayTrieNode *iterativeLowFind(Key const &, bool const prefix, bool const haveTrailChar, int const trailchar, CompactArrayTrieNode *n);
+    template <class InputIterator> static CompactArrayTrieNode *iterativeLowFind(InputIterator begin, const InputIterator &end, Key const &, bool const prefix, bool const haveTrailChar, int const trailchar, CompactArrayTrieNode *n);
 
     typedef std::vector<CompactArrayTrieNode *> children_type;
 
@@ -84,6 +84,7 @@ private:
     CompactArrayTrieNode& operator =(CompactArrayTrieNode const &);
 
     static bool iterativeAdd(const key_type &, const mapped_type &, CompactArrayTrieNode *);
+    template <class InputIterator> static bool iterativeAdd(InputIterator begin, const InputIterator &end, const key_type &, const mapped_type &, CompactArrayTrieNode *);
 };
 
 template <class key_type, class mapped_type>
@@ -101,12 +102,10 @@ CompactArrayTrieNode<key_type,mapped_type>::~CompactArrayTrieNode()
 }
 
 template <class key_type, class mapped_type>
+template <class InputIterator>
 CompactArrayTrieNode<key_type,mapped_type> *
-CompactArrayTrieNode<key_type,mapped_type>::iterativeLowFind(key_type const & key, bool const prefix, const bool haveTrailChar, const int trailchar, CompactArrayTrieNode *n)
+CompactArrayTrieNode<key_type,mapped_type>::iterativeLowFind(InputIterator i, const InputIterator &end, key_type const & key, bool const prefix, const bool haveTrailChar, const int trailchar, CompactArrayTrieNode *n)
 {
-    auto end = key.end();
-    auto i = key.begin();
-
     while (i != end) {
         // not yet at the end of the key string, grab the next character
         const int character = *i;
@@ -162,13 +161,20 @@ CompactArrayTrieNode<key_type,mapped_type>::findInNode(int character)
     return nullptr;
 }
 
+// not used anymore; kept around as a reference for now
 template <class key_type, class mapped_type>
 bool
 CompactArrayTrieNode<key_type,mapped_type>::iterativeAdd(const key_type &k, const mapped_type &v, CompactArrayTrieNode *n)
 {
-    auto e = k.end();
-    auto i=k.begin();
-    while (i != e) {
+    return iterativeAdd(k.begin(), k.end(), k, v, n);
+}
+
+template <class key_type, class mapped_type>
+template <class InputIterator>
+bool
+CompactArrayTrieNode<key_type,mapped_type>::iterativeAdd(InputIterator i, const InputIterator &end, const key_type &k,const mapped_type &v, CompactArrayTrieNode *n)
+{
+    while (i != end) {
         const size_t slot = *i;
         if (n->children.empty()) { // empty children. Make room for exactly one
             n->children.resize(1, nullptr);
@@ -189,6 +195,7 @@ CompactArrayTrieNode<key_type,mapped_type>::iterativeAdd(const key_type &k, cons
     n->data = std::make_pair(k,v);
     return true;
 }
+
 
 template <class key_type, class mapped_type>
 void
