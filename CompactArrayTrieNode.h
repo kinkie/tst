@@ -26,7 +26,11 @@ public:
     // return a pointer to the node keyed on key, if found, or nullptr
     // if no exact key matches
     CompactArrayTrieNode *find(Key const & k) {
-        return iterativeLowFind(k.begin(), k.end(), false, false, 0, this);
+        return find(k.begin(), k.end());
+    }
+    template <class InputIterator>
+    CompactArrayTrieNode *find(InputIterator begin, const InputIterator&end) {
+        return iterativeLowFind(begin, end, false, false, 0, this);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
