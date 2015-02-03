@@ -9,36 +9,57 @@
 template <class Key, class Value>
 class CompactTrieIterator;
 
-/**
+/** Associative ordered container oriented to efficient prefix lookups
  *
+ * The implementation tries to mimic at least partly the use patterns of std::map.
+ * The requirement on the key is that it must be iterable, support begin()
+ * and end(), and its iterators' dereference must convert to an int.
+ * std::string and SBuf are both valid key types.
+ * There is no constraint on the value type, except that it must have
+ * by-value semantics (it must clean up after itself in its destructor).
+ *
+ * \sa http://en.wikipedia.org/wiki/Trie
+ * \sa http://www.cplusplus.com/reference/map/map/
  */
 template <class Key, class Value>
 class CompactTrie {
 public:
     typedef Key key_type;
     typedef Value mapped_type;
+    // this is the actually-stored data type
     typedef std::pair<key_type, mapped_type> value_type;
+    // not really a full iterator; just enough to mimic the most common patterns
     typedef CompactTrieIterator<key_type, mapped_type> iterator;
 
 private:
+    // convenience type
     typedef CompactArrayTrieNode<key_type, mapped_type> node_type;
 
 public:
     CompactTrie() {}
     virtual ~CompactTrie() {}
 
-    /// add a new item. Return false if item can't be added
+    /** add a new item to the Trie
+     *
+     * \return false if item can't be added
+     */
     bool insert(const key_type &k, mapped_type v) {
         contentsCache.clear();
         return root.insert(k,v);
     }
 
-    /// return true whether the key(prefix is optional second parameter is true)
-    /// is present in the Trie.
+    /** Check for key or prefix presence
+     *
+     * \param k the key to be looked up
+     * \param prefix if true request a prefix lookup
+     * \return true if the key is present in the container; if prefix is true,
+     *   then return true if any of the keys stored in the container is
+     *   a prefix of k
+     */
     bool has(const key_type &k, bool const prefix = false) {
         return has(k.begin(), k.end(), prefix);
     }
-    /// iterator-based variant of has()
+    /// check for key/prefix presence, passing the key by begin and end iterators
     template <class InputIterator>
     bool has(InputIterator begin, const InputIterator &end, bool const prefix = false) {
         if (prefix)
@@ -46,12 +67,15 @@ public:
         return (root.find(begin, end) != nullptr);
     }
 
-    /// return an iterator to value_type (aka std::pair<key,value>)
-    /// corresponding to the supplied key, or end() if not found.
+    /** key lookup
+     *
+     * \return iterator to value_type (std::pair<key_type, mapped_type>) if
+     *  key is present, or end() if key is not present
+     */
     iterator find(const key_type &k) {
         return find(k.begin(), k.end());
     }
-    /// iterator-based variant of find()
+    /// key lookup, passing the key by begin and end iterators
     template <class InputIterator>
     iterator find(InputIterator begin, const InputIterator& end) {
         node_type *f=root.find(begin,end);
@@ -60,13 +84,16 @@ public:
         return iterator(f);
     }
 
-    /// return an iterator to value_type (aka std::pair<key,value>)
-    /// corresponding to the SHORTEST PREFIX of the supplied key in the Trie,
-    /// or end() if not found.
-    iterator prefixFind(const key_type & k) {
-        return prefixFind(k.begin(),k.end());
+    /** prefix lookup
+     *
+     * \return iterator to value_type (std::pair<key_type, mapped_type>)
+     *  corresponding to the shortest prefix of the passed argument stored
+     *  in the Trie, or end() if no prefix of the argument is found
+     */
+    iterator prefixFind(const key_type & prefix) {
+        return prefixFind(prefix.begin(),prefix.end());
     }
-    /// iterator-based variant of prefixFind()
+    /// prefix lookup, passing the key by begin and end iterators
     template <class InputIterator>
     iterator prefixFind(InputIterator begin, const InputIterator& end) {
         node_type *f=root.findPrefix(begin,end);
@@ -75,17 +102,23 @@ public:
         return iterator(f);
     }
 
-    /// return an iterator to value_type (aka std::pair<key,value>)
-    /// corresponding to the SHORTEST PREFIX of the supplied key in the Trie,
-    /// where the prefix ends with the supplied suffixChar, OR corresponding
-    /// to the full key if present, OR to the full key plus suffixChar
-    /// e.g. prefixFind("foo%bar%gazonk",'%') will return an iterator to
-    /// any of (if present, in order of preference):
-    /// foo%, foo%bar%, foo%bar%gazonk, foo%bar%gazonk%
+    /** constrained prefix find
+     *
+     * Search for the stored entry corresponding to the shortest prefix
+     * of the supplied prefix where the prefix ends with the supplied suffixChar
+     * or corresponding to the full key or to the full key plus suffixChar.
+     * For example, prefixFind("foo%bar%gazonk",'%') will return an iterator to
+     * the value_type of (if present, in order of preference):
+     * "foo%", "foo%bar%", "foo%bar%gazonk", "foo%bar%gazonk%", end()
+     *
+     * \return iterator to value_type (std::pair<key_type, mapped_type>)
+     *  if any constrained prefix is found, end() if no prefix is found
+     *
+     */
     iterator prefixFind(const key_type & k, int suffixChar) {
         return prefixFind(k.begin(), k.end(), suffixChar);
     }
-    /// iterator-based variant of prefixFind(suffixChar)
+    /// constrained prefix lookup, passing the key by begin and end iterators
     template <class InputIterator>
     iterator prefixFind(InputIterator begin, const InputIterator& end, int suffixChar) {
         node_type *f=root.findPrefix(begin, end, suffixChar);
@@ -94,8 +127,11 @@ public:
         return iterator(f);
     }
 
-    /// end-iterator, conforming to STL end(), except that
-    /// TrieA.end() == TrieB.end() for any TrieA, TrieB
+    /** end-iterator
+     *
+     * This iterator can support the common STL patterns, but it is only
+     * a facade. In particular TrieA.end() == TrieB.end() for any TrieA, TrieB
+     */
     iterator end()
     {
         static CompactArrayTrieNode<Key,Value> endnode;
@@ -103,12 +139,16 @@ public:
         return enditer;
     }
 
-    /// return true if the Trie is empty
+    /// empty-trie test
     bool empty() const {
         return root.empty();
     }
 
-    /// return a vector of iterators to all valid contents in the trie
+    /** contents extractor
+     *
+     * \return std::vector of iterators to value_type
+     * (std::pair<key_type,mapped_type>), sorted by key in ascending order
+     */
     const std::vector<iterator> & contents();
 
     //TODO: add delete

@@ -8,6 +8,10 @@ class CompactTrie;
 template <class Key, class Value>
 class CompactTrieIterator;
 
+/** Private auxiliary class for CompactTrie.
+ *
+ * DO NOT USE or try to access it in any other context.
+ */
 template <class Key, class Value>
 class CompactArrayTrieNode
 {
@@ -64,7 +68,7 @@ public:
 
     // add a new value_type made of Key and Value in the position pointed
     // to by Key. This method is meant to be called on the root node of the
-    // Trie; will recurse on the internal variant by the same name.
+    // Trie
     // returns false if the string can't be added.
     // will overwrite previously-set data with the same key
     bool insert(key_type const &k , const mapped_type &v) {
@@ -134,7 +138,7 @@ CompactArrayTrieNode<key_type,mapped_type>::iterativeLowFind(InputIterator i, co
         // if the key is "moc.elpmaxe.www" and tree contains "moc.elpmaxe." we want a match.
         // "moc.elpmaxe." is a tree entry when child('.')->haveData == true
         //
-        // NP: check for this here instead of on recurse because the child node
+        // NP: check for this here instead of on iterate because the child node
         //     does not 'know' what character we used to reach it.
         if (prefix && haveTrailChar && character == trailchar && child && child->haveData)
             return child;
