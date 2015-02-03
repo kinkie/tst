@@ -26,19 +26,19 @@ public:
     // return a pointer to the node keyed on key, if found, or nullptr
     // if no exact key matches
     CompactArrayTrieNode *find(Key const & k) {
-        return iterativeLowFind(k.begin(), k.end(), k, false, false, 0, this);
+        return iterativeLowFind(k.begin(), k.end(), false, false, 0, this);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // or nullptr if no prefix is found
     CompactArrayTrieNode *findPrefix(Key const & k) {
-        return iterativeLowFind(k.begin(), k.end(), k, true, false, 0, this);
+        return iterativeLowFind(k.begin(), k.end(), true, false, 0, this);
     }
 
     // return a pointer to the node keyed on the SHORTEST prefix of key
     // ending with the supplied suffix char or nullptr if none is found
     CompactArrayTrieNode *findPrefix(Key const & k, int const suffixChar) {
-        return iterativeLowFind(k.begin(), k.end(), k, true, true, suffixChar, this);
+        return iterativeLowFind(k.begin(), k.end(), true, true, suffixChar, this);
     }
 
     // true if the subtree (including the current node) is empty
@@ -70,7 +70,7 @@ private:
     // (if prefix==true) or exact match; return NULL if nothing is found.
     // if havetrailchar is true, then a prefix is matched only if it ends
     // wuth the specified trailchar, otherwise it is ignored.
-    template <class InputIterator> static CompactArrayTrieNode *iterativeLowFind(InputIterator begin, const InputIterator &end, Key const &, bool const prefix, bool const haveTrailChar, int const trailchar, CompactArrayTrieNode *n);
+    template <class InputIterator> static CompactArrayTrieNode *iterativeLowFind(InputIterator begin, const InputIterator &end, bool const prefix, bool const haveTrailChar, int const trailchar, CompactArrayTrieNode *n);
 
     typedef std::vector<CompactArrayTrieNode *> children_type;
 
@@ -104,7 +104,7 @@ CompactArrayTrieNode<key_type,mapped_type>::~CompactArrayTrieNode()
 template <class key_type, class mapped_type>
 template <class InputIterator>
 CompactArrayTrieNode<key_type,mapped_type> *
-CompactArrayTrieNode<key_type,mapped_type>::iterativeLowFind(InputIterator i, const InputIterator &end, key_type const & key, bool const prefix, const bool haveTrailChar, const int trailchar, CompactArrayTrieNode *n)
+CompactArrayTrieNode<key_type,mapped_type>::iterativeLowFind(InputIterator i, const InputIterator &end, bool const prefix, const bool haveTrailChar, const int trailchar, CompactArrayTrieNode *n)
 {
     while (i != end) {
         // not yet at the end of the key string, grab the next character
