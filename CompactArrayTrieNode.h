@@ -23,69 +23,105 @@ public:
     CompactArrayTrieNode();
     ~CompactArrayTrieNode();
 
-    // return a pointer to the node corresponding to the char, or nullptr
-    // if not found
+    /** node lookup
+     *
+     * Main nonrecursive node lookup funciton.
+     * \return pointer to child node corresponding to char if present,
+     *  nullptr if not present.
+     */
     CompactArrayTrieNode *findInNode(int character);
 
-    // return a pointer to the node keyed on key, if found, or nullptr
-    // if no exact key matches
+    /** subtree lookup
+     *
+     * \return a pointer to the node containing the exact key match if found,
+     *  or nullptr if the key is not contained in the subtree
+     */
     CompactArrayTrieNode *find(Key const & k) {
         return find(k.begin(), k.end());
     }
+    /// subtree lookup, iterator-based variant
     template <class InputIterator>
     CompactArrayTrieNode *find(InputIterator begin, const InputIterator& end) {
         return iterativeLowFind(begin, end, false, false, 0, this);
     }
 
-    // return a pointer to the node keyed on the SHORTEST prefix of key
-    // or nullptr if no prefix is found
-    CompactArrayTrieNode *findPrefix(Key const & k) {
-        return findPrefix(k.begin(), k.end());
+    /** subtree prefix lookup
+     *
+     * \return pointer to the node keyed on the SHORTEST prefix of key
+     *   or nullptr if no prefix is found
+     */
+    CompactArrayTrieNode *findPrefix(Key const & key) {
+        return findPrefix(key.begin(), key.end());
     }
+    /// subtree prefix lookup, iterator-based variant
     template <class InputIterator>
     CompactArrayTrieNode *findPrefix(InputIterator begin, const InputIterator& end) {
         return iterativeLowFind(begin, end, true, false, 0, this);
     }
 
-    // return a pointer to the node keyed on the SHORTEST prefix of key
-    // ending with the supplied suffix char or nullptr if none is found
-    CompactArrayTrieNode *findPrefix(Key const & k, int const suffixChar) {
-        return findPrefix(k.begin(), k.end(), suffixChar);
+    /** subtree prefix lookup with terminator constraints
+     *
+     * Search for the node corresponding to the shortest prefix of the supplied
+     * key where the prefix ends with the supplied suffixChar
+     * or corresponding to the full key or to the full key plus suffixChar.
+     * For example, findPrefix("foo%bar%gazonk",'%') will return a pointer
+     * to the node corresponding to the first key among:
+     * "foo%", "foo%bar%", "foo%bar%gazonk", "foo%bar%gazonk%", nullptr
+     *
+     * \return pointer to node if any constrained prefix is found, nullptr
+     *   if no such prefix is found
+     */
+    CompactArrayTrieNode *findPrefix(Key const & key, int const suffixChar) {
+        return findPrefix(key.begin(), key.end(), suffixChar);
     }
+    // subtree prefix lookup with terminator constraints, iterator variant
     template <class InputIterator>
     CompactArrayTrieNode *findPrefix(InputIterator begin, const InputIterator& end, int const suffixChar) {
         return iterativeLowFind(begin, end, true, true, suffixChar, this);
     }
 
-    // true if the subtree (including the current node) is empty
-    // NOTE: this implementation is only correct if it's not possible
-    // to remove children from the TrieNode. Once that API is implemented,
-    // in order for empty() to be correct, it'll have to also clear the
-    // children array once the last child is removed.
+    /** subtree emptyness
+     *
+     * \return true if the subtree (including the current node) is empty
+     * \note this implementation is only correct if it's not possible
+     *   to remove children from the TrieNode. Once that API is implemented,
+     *   in order for empty() to be correct, it'll have to also clear the
+     *   children array once the last child is removed.
+     */
     bool empty() const {
         return (!haveData && children.empty());
     }
 
-    // add a new value_type made of Key and Value in the position pointed
-    // to by Key. This method is meant to be called on the root node of the
-    // Trie
-    // returns false if the string can't be added.
-    // will overwrite previously-set data with the same key
+    /** insert a new value in the subtrie
+     *
+     * Add a new value_type made of Key and Value in the position pointed
+     * to by Key. This method is meant to be called on the root node of the
+     * Trie. Any preexisting value keyed on the same key gets replaced.
+     *
+     * \return false if the value can't be added.
+     */
     bool insert(key_type const &k , const mapped_type &v) {
         return iterativeAdd(k.begin(), k.end(), k, v, this);
     }
 
-    // walk the subtree and fill the passed std::vector with pointers to nodes having data
+    /** data collector
+     *
+     * walk the subtree and fill the passed std::vector reference
+     * with pointers to nodes having data, sorted lexicographically
+     */
     void recursivePreorderWalk(std::vector<CompactArrayTrieNode *> &) ;
 
     friend class CompactTrie<key_type, mapped_type>;
     friend class CompactTrieIterator<key_type, mapped_type>;
 
 private:
-    // return a pointer to the stored value of the longest-matching-prefix
-    // (if prefix==true) or exact match; return NULL if nothing is found.
-    // if havetrailchar is true, then a prefix is matched only if it ends
-    // wuth the specified trailchar, otherwise it is ignored.
+    /** low-level matching method
+     *
+     * Low-level function implementing all the find variants: exact key match
+     *  (if prefix == false), prefix match (if prefix == true) and constrained
+     *  prefix metch (if prefix == true && haveTrailChar == true)
+     * \return pointer sought-for node or nullptr if not found.
+     */
     template <class InputIterator>
     static CompactArrayTrieNode *iterativeLowFind(InputIterator begin, const InputIterator &end, bool const prefix, bool const haveTrailChar, int const trailchar, CompactArrayTrieNode *n);
 
@@ -96,12 +132,20 @@ private:
     int offset;
     bool haveData;
 
-    /* not implemented */
+    /// not implemented
     CompactArrayTrieNode(const CompactArrayTrieNode&);
+    /// not implemented
     CompactArrayTrieNode& operator =(CompactArrayTrieNode const &);
 
+    /** low-level data insert
+     *
+     * Low-level function inserting new data in the Trie (or replacing
+     * data with the same key). Extends Trie storage as needed.
+     * \return false if data cannot be added
+     */
     static bool iterativeAdd(const key_type &, const mapped_type &, CompactArrayTrieNode *);
     template <class InputIterator>
+    /// low-level data insert, iterator-based variant
     static bool iterativeAdd(InputIterator begin, const InputIterator &end, const key_type &, const mapped_type &, CompactArrayTrieNode *);
 };
 

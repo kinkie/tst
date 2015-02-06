@@ -105,7 +105,7 @@ public:
     /** constrained prefix find
      *
      * Search for the stored entry corresponding to the shortest prefix
-     * of the supplied prefix where the prefix ends with the supplied suffixChar
+     * of the supplied key where the prefix ends with the supplied suffixChar
      * or corresponding to the full key or to the full key plus suffixChar.
      * For example, prefixFind("foo%bar%gazonk",'%') will return an iterator to
      * the value_type of (if present, in order of preference):
@@ -115,8 +115,8 @@ public:
      *  if any constrained prefix is found, end() if no prefix is found
      *
      */
-    iterator prefixFind(const key_type & k, int suffixChar) {
-        return prefixFind(k.begin(), k.end(), suffixChar);
+    iterator prefixFind(const key_type & key, int suffixChar) {
+        return prefixFind(key.begin(), key.end(), suffixChar);
     }
     /// constrained prefix lookup, passing the key by begin and end iterators
     template <class InputIterator>
